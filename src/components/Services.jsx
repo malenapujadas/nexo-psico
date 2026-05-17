@@ -66,7 +66,7 @@ export const Services = () => {
         {/* Botón "Ver todos los servicios" */}
         <div className="flex justify-center">
           <a 
-            href="#" 
+            href="/servicios" 
             className="inline-block border-2 border-nexo-blue text-nexo-blue px-8 py-3 rounded-lg font-semibold hover:bg-nexo-blue hover:text-white transition-all duration-300"
           >
             Ver todos los servicios

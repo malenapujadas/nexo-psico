@@ -10,6 +10,7 @@ import { Supervisiones } from './pages/Supervisiones';
 import { Trabajemos } from './pages/Trabajemos';
 import { Programa } from './pages/Programa';
 import { Contacto } from './pages/Contacto';
+import { Servicios } from './pages/Servicios';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/servicios" element={<Servicios />} />
             <Route path="/terapia" element={<Terapia />} />
             <Route path="/evaluaciones-psicologicas" element={<Evaluaciones />} />
             <Route path="/aptos-psicologicos" element={<Aptos />} />

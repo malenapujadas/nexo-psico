@@ -1,7 +1,14 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 export const Testimonials = () => {
   const scrollRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+
+  // Estados para la lógica de arrastre (Drag) con el mouse
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeftState = useRef(0);
 
   const testimonialsList = [
     {
@@ -42,12 +49,86 @@ export const Testimonials = () => {
     }
   ];
 
-  // Funciones para mover el carrusel con las flechas
+  // 1. Detectar si la sección está en pantalla para activar el Autoplay
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    if (scrollRef.current) observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // 2. Autoplay: Movimiento automático paso a paso
+  useEffect(() => {
+    if (!isInView) return;
+
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const container = scrollRef.current;
+        // Si llegó al final, vuelve al principio, sino avanza el ancho de una tarjeta aproximado
+        if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: 350, behavior: 'smooth' });
+        }
+      }
+    }, 4000); // Se mueve automáticamente cada 4 segundos
+
+    return () => clearInterval(interval);
+  }, [isInView]);
+
+  // 3. Controlar la paginación activa leyendo el scroll real
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const scrollPercentage = container.scrollLeft / (container.scrollWidth - container.clientWidth);
+      const index = Math.min(
+        Math.round(scrollPercentage * (testimonialsList.length - 1)),
+        testimonialsList.length - 1
+      );
+      if (!isNaN(index) && index >= 0) {
+        setActiveIndex(index);
+      }
+    }
+  };
+
+  // Ir a un testimonio específico al hacer click en los puntitos
+  const scrollToTarget = (index) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const targetScroll = (maxScroll / (testimonialsList.length - 1)) * index;
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      setActiveIndex(index);
+    }
+  };
+
+  // Funciones originales para mover el carrusel con las flechas
   const scroll = (direction) => {
     if (scrollRef.current) {
       const scrollAmount = direction === 'left' ? -400 : 400;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
+  };
+
+  // 4. Lógica para arrastrar con el Mouse (Desktop Drag to Scroll)
+  const handleMouseDown = (e) => {
+    isDown.current = true;
+    startX.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftState.current = scrollRef.current.scrollLeft;
+  };
+
+  const handleMouseLeaveOrUp = () => {
+    isDown.current = false;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDown.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5; // Multiplicador de velocidad de arrastre
+    scrollRef.current.scrollLeft = scrollLeftState.current - walk;
   };
 
   return (
@@ -77,10 +158,16 @@ export const Testimonials = () => {
             </svg>
           </button>
 
-          {/* Contenedor del Carrusel (Scroll oculto pero funcional) */}
+          {/* Contenedor del Carrusel (Con eventos de arrastre por mouse agregados) */}
           <div 
             ref={scrollRef}
+            onScroll={handleScroll}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeaveOrUp}
+            onMouseUp={handleMouseLeaveOrUp}
+            onMouseMove={handleMouseMove}
             className="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 pt-4 px-4 -mx-4 
+            cursor-grab active:cursor-grabbing select-none
             [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             {testimonialsList.map((testimonial, index) => (
@@ -122,6 +209,23 @@ export const Testimonials = () => {
           </button>
 
         </div>
+
+        {/* COMPONENTE NUEVO: Pagination dots agregados abajo al centro */}
+        <div className="flex justify-center gap-2 mt-6">
+          {testimonialsList.map((_, dotIndex) => (
+            <button
+              key={dotIndex}
+              onClick={() => scrollToTarget(dotIndex)}
+              className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                activeIndex === dotIndex 
+                  ? 'w-6 bg-nexo-blue' 
+                  : 'w-2 bg-nexo-dark/20 hover:bg-nexo-dark/40'
+              }`}
+              aria-label={`Ir al testimonio ${dotIndex + 1}`}
+            />
+          ))}
+        </div>
+
       </div>
     </section>
   );

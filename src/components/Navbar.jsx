@@ -11,7 +11,7 @@ export const Navbar = () => {
     { name: 'Inicio', href: '/' },
     { 
       name: 'Servicios', 
-      href: '#',
+      href: '/servicios',
       dropdown: [
         { name: 'Terapia', href: '/terapia' },
         { name: 'Evaluaciones Psicológicas', href: '/evaluaciones-psicologicas' },
