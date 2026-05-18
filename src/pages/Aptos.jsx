@@ -52,27 +52,47 @@ export const Aptos = () => {
     <div className="min-h-screen bg-white pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         
-        {/* SELECTOR DE PASTILLA (Con toques en Verde) */}
-        <div className="flex justify-center mb-16 md:mb-24">
-          <div className="inline-flex overflow-x-auto bg-nexo-bg/40 p-1.5 rounded-full border border-nexo-sand/30 shadow-sm max-w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {aptosData.map((item, index) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(index);
-                  setOpenAccordion(null);
+        {/* SELECTOR DE TABS (Con toques en Verde y Línea Progresiva Interna) */}
+        <div className="flex justify-center mb-16 md:mb-24 w-full">
+          
+          {/* Contenedor principal */}
+          <div className="relative inline-flex flex-col bg-nexo-bg/40 p-1.5 pb-3 md:pb-1.5 rounded-3xl md:rounded-full border border-nexo-sand/30 shadow-sm max-w-full overflow-hidden">
+            
+            {/* El menú deslizable */}
+            <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {aptosData.map((item, index) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(index);
+                    setOpenAccordion(null);
+                  }}
+                  className={`relative whitespace-nowrap px-6 py-3 md:px-8 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 focus:outline-none z-10
+                    ${activeTab === index 
+                      ? 'bg-nexo-green text-white shadow-md' 
+                      : 'text-nexo-dark/60 hover:text-nexo-dark hover:bg-white/50'
+                    }`}
+                >
+                  {item.title}
+                </button>
+              ))}
+            </div>
+
+            {/* LÍNEA PROGRESIVA CONTINUA (Verde, pegada al borde inferior, solo en mobile) */}
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-nexo-sand/40 md:hidden z-0">
+              <div 
+                className="absolute top-0 bottom-0 bg-nexo-green transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${100 / aptosData.length}%`, 
+                  transform: `translateX(${activeTab * 100}%)` 
                 }}
-                className={`relative whitespace-nowrap px-6 py-3 md:px-8 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 focus:outline-none
-                  ${activeTab === index 
-                    ? 'bg-nexo-green text-white shadow-md' 
-                    : 'text-nexo-dark/60 hover:text-nexo-dark hover:bg-white/50'
-                  }`}
-              >
-                {item.title}
-              </button>
-            ))}
+              />
+            </div>
+
           </div>
+
         </div>
+
 
         {/* CONTENIDO DINÁMICO */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start animate-fade-in-up">

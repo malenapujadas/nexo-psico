@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import imgEmilce from '../assets/foto-emilce.png';
 import imgPatricia from '../assets/foto-patricia.png';
 import imgNatalia from '../assets/foto-natalia.png';
-import logoBg from '../assets/logo.png'; 
 
 export const Team = () => {
   const sliderRef = useRef(null);
@@ -72,32 +71,20 @@ export const Team = () => {
   return (
     <section className="w-full py-24 bg-white overflow-hidden">
       {/* Contenedor principal: alinea los elementos arriba (items-start) */}
-      <div className="w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row items-start px-6 md:px-12 gap-10 lg:gap-8">
+      <div className="w-full max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center lg:items-start px-6 md:px-12 gap-12 lg:gap-16">
         
-        {/* COLUMNA 1: LOGO (25% del ancho en compu) */}
-        <div className="w-full lg:w-3/12 flex-shrink-0 animate-fade-in-up">
-          {/* Logo empujado abajo (mt-32) e izquierda (-ml-20), sin filtros de color */}
-          <div className="w-64 h-64 lg:w-[320px] lg:h-[320px] aspect-square rounded-full border border-nexo-sand/30 flex items-center justify-center opacity-40 -ml-8 lg:-ml-20 mt-12 lg:mt-32 p-8 pointer-events-none">
-            <img 
-              src={logoBg} 
-              alt="Nexo Psico Logo" 
-              className="w-full h-full object-contain" 
-            />
-          </div>
-        </div>
-
-        {/* COLUMNA 2: TEXTOS (35% del ancho en compu) */}
-        <div className="w-full lg:w-4/12 flex-shrink-0 text-center lg:text-left animate-fade-in-up animation-delay-200">
+        {/* COLUMNA 1: TEXTOS (Ahora alineada a la izquierda, ocupando aprox 40% en compu) */}
+        <div className="w-full lg:w-5/12 flex-shrink-0 text-center lg:text-left animate-fade-in-up mt-0 lg:mt-12">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-6 leading-tight">
             Tres miradas,<br className="hidden lg:block" /> un mismo compromiso
           </h2>
-          <p className="text-lg text-nexo-dark/80">
+          <p className="text-lg text-nexo-dark/80 max-w-md mx-auto lg:mx-0">
             Conocé a las profesionales que dan vida a Nexo y te acompañarán en cada paso de tu proceso.
           </p>
         </div>
 
-        {/* COLUMNA 3: CARRUSEL Y PAGINACIÓN (40% del ancho en compu) */}
-        <div className="w-full lg:w-5/12 flex-shrink-0 relative animate-fade-in-up animation-delay-400">
+        {/* COLUMNA 2: CARRUSEL Y PAGINACIÓN (Ahora ocupa el 60% restante) */}
+        <div className="w-full lg:w-7/12 flex-shrink-0 relative animate-fade-in-up animation-delay-200">
           
           {/* Contenedor deslizable (solo esto hace scroll) */}
           <div 
@@ -114,8 +101,8 @@ export const Team = () => {
             {teamList.map((member, index) => (
               <div 
                 key={index}
-                // Ancho del 75% para que la primera se vea completa y la segunda asome
-                className="flex-none w-[85%] md:w-[75%] snap-start flex flex-col group transition-transform duration-300 hover:-translate-y-2"
+                // Ancho ajustado para que entre mejor en el nuevo layout
+                className="flex-none w-[85%] md:w-[60%] lg:w-[50%] snap-start flex flex-col group transition-transform duration-300 hover:-translate-y-2"
               >
                 {/* Imagen */}
                 <div className="w-full aspect-[4/5] mb-6 rounded-[2.5rem] overflow-hidden shadow-lg border border-nexo-sand/10">
@@ -127,7 +114,7 @@ export const Team = () => {
                 </div>
 
                 {/* Info */}
-                <div className="px-2">
+                <div className="px-2 text-left">
                   <h3 className="text-xl md:text-2xl font-bold text-nexo-dark mb-1">
                     {member.name}
                   </h3>
@@ -142,8 +129,8 @@ export const Team = () => {
             ))}
           </div>
 
-          {/* Paginación (Fija y centrada bajo las imágenes) */}
-          <div className="flex justify-center gap-3 mt-6">
+          {/* Paginación */}
+          <div className="flex justify-center lg:justify-start lg:pl-4 gap-3 mt-6">
             {teamList.map((_, index) => (
               <button
                 key={index}

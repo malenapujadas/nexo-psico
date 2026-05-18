@@ -5,7 +5,7 @@ export const Footer = () => {
     { name: 'Inicio', href: '/' },
     { 
       name: 'Servicios', 
-      href: '#',
+      href: '/servicios',
       dropdown: [
         { name: 'Terapia', href: '/terapia' },
         { name: 'Evaluaciones Psicológicas', href: '#' },
@@ -14,9 +14,9 @@ export const Footer = () => {
         { name: 'Supervisiones', href: '#' },
       ]
     },
-    { name: 'Trabajemos', href: '#' },
-    { name: 'Programa Bienestar', href: '#' },
-    { name: 'Contacto', href: '#' },
+    { name: 'Trabajemos', href: '/trabajemos' },
+    { name: 'Programa Bienestar', href: '/programa' },
+    { name: 'Contacto', href: '/contacto' },
   ];
 
   return (
@@ -64,7 +64,7 @@ export const Footer = () => {
 
           {/* Instagram */}
           <a 
-            href="https://instagram.com" 
+            href="https://www.instagram.com/nexopsico/?hl=es" 
             target="_blank" 
             rel="noopener noreferrer"
             className="p-3 bg-white/5 hover:bg-white/10 text-nexo-bg hover:text-nexo-sand rounded-full transition-all duration-300 transform hover:-translate-y-1"

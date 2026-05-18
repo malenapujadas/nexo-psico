@@ -24,8 +24,7 @@ const servicesData = [
       { q: "¿Cuándo es recomendable consultar?", a: "Discusiones frecuentes, tensión en la convivencia, problemas de comunicación, celos, desconfianza o crisis tras eventos vitales." },
       { q: "¿Qué trabajamos en las sesiones?", a: "Exploramos la historia del vínculo, mejoramos la comunicación, identificamos necesidades emocionales y construimos acuerdos saludables." },
       { q: "¿Cómo es el primer paso?", a: "Realizamos una Entrevista de Admisión en pareja. Luego, los derivamos al profesional experto en vínculos de nuestro equipo." },
-/*       { q: "¿Qué pasa si decidimos separarnos?", a: "Ayudamos a que el proceso de separación sea con respeto, claridad y el menor daño emocional posible." }
- */    ]
+   ]
   },
   {
     id: 'infantil',
@@ -65,26 +64,45 @@ export const Terapia = () => {
     <div className="min-h-screen bg-white pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         
-        {/* NUEVO SELECTOR DE TABS: Pastilla Flotante Minimalista */}
-        <div className="flex justify-center mb-16 md:mb-24">
-          <div className="inline-flex overflow-x-auto bg-nexo-bg/40 p-1.5 rounded-full border border-nexo-sand/30 shadow-sm max-w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {servicesData.map((service, index) => (
-              <button
-                key={service.id}
-                onClick={() => {
-                  setActiveTab(index);
-                  setOpenAccordion(null); // Resetea el acordeón al cambiar de tab
+        {/* SELECTOR DE TABS ADAPTADO CON LÍNEA PROGRESIVA INTERNA */}
+        <div className="flex justify-center mb-16 md:mb-24 w-full">
+          
+          {/* Contenedor principal (relative y overflow-hidden para contener la línea) */}
+          <div className="relative inline-flex flex-col bg-nexo-bg/40 p-1.5 pb-3 md:pb-1.5 rounded-3xl md:rounded-full border border-nexo-sand/30 shadow-sm max-w-full overflow-hidden">
+            
+            {/* El menú deslizable */}
+            <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {servicesData.map((service, index) => (
+                <button
+                  key={service.id}
+                  onClick={() => {
+                    setActiveTab(index);
+                    setOpenAccordion(null); 
+                  }}
+                  className={`relative whitespace-nowrap px-6 py-3 md:px-8 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 focus:outline-none z-10
+                    ${activeTab === index 
+                      ? 'bg-white text-nexo-blue shadow-md' 
+                      : 'text-nexo-dark/60 hover:text-nexo-dark hover:bg-white/50'
+                    }`}
+                >
+                  {service.title}
+                </button>
+              ))}
+            </div>
+
+            {/* LÍNEA PROGRESIVA CONTINUA (Pegada al borde inferior interno, solo en mobile) */}
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-nexo-sand/40 md:hidden z-0">
+              <div 
+                className="absolute top-0 bottom-0 bg-nexo-blue transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${100 / servicesData.length}%`, 
+                  transform: `translateX(${activeTab * 100}%)` 
                 }}
-                className={`relative whitespace-nowrap px-6 py-3 md:px-8 md:py-3 rounded-full text-sm md:text-base font-semibold transition-all duration-300 focus:outline-none
-                  ${activeTab === index 
-                    ? 'bg-white text-nexo-blue shadow-md' 
-                    : 'text-nexo-dark/60 hover:text-nexo-dark hover:bg-white/50'
-                  }`}
-              >
-                {service.title}
-              </button>
-            ))}
+              />
+            </div>
+
           </div>
+
         </div>
 
         {/* CONTENIDO DINÁMICO */}

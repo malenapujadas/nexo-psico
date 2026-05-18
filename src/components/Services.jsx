@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import servicioPsicoterapia from '../assets/servicio-psicoterapia.png';
 import servicioVocacional from '../assets/servicio-vocacional.png';
 import servicioPareja from '../assets/servicio-pareja.png';
@@ -7,17 +8,17 @@ export const Services = () => {
     {
       title: "Psicoterapia Individual",
       image: servicioPsicoterapia,
-      link: "#"
+      href: "/terapia"
     },
     {
       title: "Orientación Vocacional",
       image: servicioVocacional,
-      link: "#"
+      href: "/orientacion-vocacional"
     },
     {
       title: "Terapia de Pareja",
       image: servicioPareja,
-      link: "#"
+      href: "/terapia"
     }
   ];
 
@@ -38,9 +39,9 @@ export const Services = () => {
         {/* Grilla de Servicios */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {servicesList.map((service, index) => (
-            <a 
+            <Link 
               key={index} 
-              href={service.link}
+              to={service.href}
               className="relative h-[400px] rounded-[2rem] overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300 block"
             >
               {/* Imagen con efecto Zoom al hacer hover */}
@@ -59,18 +60,18 @@ export const Services = () => {
                   {service.title}
                 </h3>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 
         {/* Botón "Ver todos los servicios" */}
         <div className="flex justify-center">
-          <a 
-            href="/servicios" 
+          <Link 
+            to="/servicios" 
             className="inline-block border-2 border-nexo-blue text-nexo-blue px-8 py-3 rounded-lg font-semibold hover:bg-nexo-blue hover:text-white transition-all duration-300"
           >
             Ver todos los servicios
-          </a>
+          </Link>
         </div>
 
       </div>

@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
+import { ScrollToTop } from './components/ScrollToTop';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -14,7 +15,8 @@ import { Servicios } from './pages/Servicios';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         {/* El Navbar queda fijo arriba */}
         <Navbar />
@@ -38,7 +40,7 @@ function App() {
         {/* El Footer queda fijo abajo */}
         <Footer />
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
