@@ -123,7 +123,7 @@ export const Contacto = () => {
                 id="nombre"
                 value={formData.nombre}
                 onChange={handleChange}
-                placeholder="Malena"
+                placeholder="Nombre"
                 className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic
                   ${errors.nombre ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}`}
               />

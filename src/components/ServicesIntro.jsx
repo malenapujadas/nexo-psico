@@ -22,7 +22,7 @@ export const ServicesIntro = () => {
   ];
 
   return (
-    <section className="w-full py-24 px-6 md:px-12 bg-nexo-bg">
+    <section className="w-full py-24 px-6 md:px-12 bg-nexo-bg overflow-hidden">
       <div className="max-w-6xl mx-auto">
         
         {/* Bloque Introductorio */}
@@ -35,14 +35,15 @@ export const ServicesIntro = () => {
           </p>
         </div>
 
-        {/* Grilla de Tarjetas (Reemplaza al carrusel) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Carrusel en Mobile / Grilla en Desktop */}
+        <div className="flex md:grid md:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {pillars.map((pillar, index) => (
             <div 
               key={index} 
-              className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 flex flex-col items-center text-center group border border-nexo-sand/20"
+              // En mobile: flex-none, 85% de ancho y snap-center. En desktop: ancho auto.
+              className="flex-none w-[85%] md:w-auto snap-center bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 transform md:hover:-translate-y-2 flex flex-col items-center text-center group border border-nexo-sand/20"
             >
-              {/* Contenedor del ícono con un leve fondo circular al hacer hover */}
+              {/* Contenedor del ícono */}
               <div className="w-20 h-20 mb-6 flex items-center justify-center rounded-full group-hover:bg-nexo-bg transition-colors duration-300">
                 <img 
                   src={pillar.icon} 

@@ -3,13 +3,16 @@ import heroImage from '../assets/hero-bg.png';
 export const Hero = () => {
   return (
     <section className="relative w-full h-screen flex pt-40 md:pt-48 lg:pt-56">
-      {/* Imagen de fondo */}
+      {/* Imagen de fondo y Capa de opacidad */}
       <div className="absolute inset-0 w-full h-full z-0">
         <img 
           src={heroImage} 
           alt="Equipo de profesionales de Nexopsico" 
           className="w-full h-full object-cover object-[center_top]"
         />
+        {/* NUEVA CAPA BLANCA TRANSPARENTE (Overlay) */}
+        {/* En mobile tiene 60% de opacidad, en desktop 20%. Podés ajustarlo a tu gusto. */}
+        <div className="absolute inset-0 bg-white/60 md:bg-white/20"></div>
       </div>
 
       {/* Contenedor del texto */}

@@ -24,10 +24,11 @@ export const Services = () => {
 
   return (
     <section className="w-full py-24 px-6 md:px-12 bg-white">
-      <div className="max-w-6xl mx-auto">
+      {/* Convertimos el contenedor en flex-col para usar la propiedad "order" */}
+      <div className="max-w-6xl mx-auto flex flex-col">
         
-        {/* Encabezado de la sección */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        {/* Encabezado de la sección (Orden 1 siempre) */}
+        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-16 order-1">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-4">
             ¿Cómo podemos acompañarte hoy?
           </h2>
@@ -36,8 +37,8 @@ export const Services = () => {
           </p>
         </div>
 
-        {/* Grilla de Servicios */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        {/* Grilla de Servicios (Orden 3 en mobile, Orden 2 en desktop) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-0 md:mb-12 order-3 md:order-2">
           {servicesList.map((service, index) => (
             <Link 
               key={index} 
@@ -64,8 +65,8 @@ export const Services = () => {
           ))}
         </div>
 
-        {/* Botón "Ver todos los servicios" */}
-        <div className="flex justify-center">
+        {/* Botón "Ver todos los servicios" (Orden 2 en mobile, Orden 3 en desktop) */}
+        <div className="flex justify-center mb-10 md:mb-0 order-2 md:order-3">
           <Link 
             to="/servicios" 
             className="inline-block border-2 border-nexo-blue text-nexo-blue px-8 py-3 rounded-lg font-semibold hover:bg-nexo-blue hover:text-white transition-all duration-300"

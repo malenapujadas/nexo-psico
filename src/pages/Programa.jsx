@@ -1,12 +1,47 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
 export const Programa = () => {
+  // Lógica para el carrusel de soluciones en mobile
+  const scrollRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Sincronizar los puntitos con el scroll manual del usuario
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const scrollPercentage = container.scrollLeft / (container.scrollWidth - container.clientWidth);
+      // Multiplicamos por 3 porque hay 4 elementos (índices del 0 al 3)
+      const index = Math.min(Math.round(scrollPercentage * 3), 3);
+      if (!isNaN(index) && index >= 0) {
+        setActiveIndex(index);
+      }
+    }
+  };
+
+  // Mover con las flechas
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -280 : 280;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  // Ir directo al tocar un puntito
+  const scrollToTarget = (index) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const targetScroll = (maxScroll / 3) * index;
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      setActiveIndex(index);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white pt-32">
       
       {/* 1. HERO */}
       <section className="max-w-4xl mx-auto px-6 md:px-12 mb-20 md:mb-32 animate-fade-in-up">
-        {/* Título más chico, tipografía más ligera, transmite calma */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-nexo-dark mb-6 leading-tight">
           Recuperá el <span className="font-medium">mando</span> de tu vida: <br className="hidden md:block"/>
           <span className="font-medium">Programa de Bienestar Mental.</span>
@@ -71,31 +106,75 @@ export const Programa = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+        {/* Carrusel en Mobile / Grilla en Desktop con Controles */}
+        <div className="relative w-full">
+          
+          {/* Flecha Izquierda (Solo Mobile) */}
+          <button
+            onClick={() => scroll('left')}
+            className="md:hidden absolute -left-2 top-[35%] -translate-y-1/2 z-10 bg-white border border-nexo-sand/30 p-2 rounded-full shadow-md text-nexo-blue focus:outline-none"
+            aria-label="Ver anterior"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+
+          {/* Flecha Derecha (Solo Mobile) */}
+          <button
+            onClick={() => scroll('right')}
+            className="md:hidden absolute -right-2 top-[35%] -translate-y-1/2 z-10 bg-white border border-nexo-sand/30 p-2 rounded-full shadow-md text-nexo-blue focus:outline-none"
+            aria-label="Ver siguiente"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
+
+          {/* AQUÍ ESTÁ EL CAMBIO: Reemplazamos px-6 por px-[10%] para un centrado matemático perfecto */}
+          <div 
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex md:grid md:grid-cols-2 gap-8 md:gap-x-8 md:gap-y-12 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 -mx-6 px-[10%] md:mx-0 md:px-0 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          >
+            <div className="text-center flex-none w-[80%] md:w-auto snap-center">
+              <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+              </div>
+              <p className="text-sm font-medium text-nexo-dark/80">Proceso psicológico y práctico, adaptado a tu realidad.</p>
             </div>
-            <p className="text-sm font-medium text-nexo-dark/80">Proceso psicológico y práctico, adaptado a tu realidad.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            <div className="text-center flex-none w-[80%] md:w-auto snap-center">
+              <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+              </div>
+              <p className="text-sm font-medium text-nexo-dark/80">Combinamos la clínica con herramientas de acción.</p>
             </div>
-            <p className="text-sm font-medium text-nexo-dark/80">Combinamos la clínica con herramientas de acción.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <div className="text-center flex-none w-[80%] md:w-auto snap-center">
+              <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              </div>
+              <p className="text-sm font-medium text-nexo-dark/80">8 semanas de acompañamiento profesional.</p>
             </div>
-            <p className="text-sm font-medium text-nexo-dark/80">8 semanas de acompañamiento profesional.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            <div className="text-center flex-none w-[80%] md:w-auto snap-center">
+              <div className="w-16 h-16 bg-nexo-sand/30 rounded-full mx-auto mb-4 flex items-center justify-center text-nexo-blue">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+              </div>
+              <p className="text-sm font-medium text-nexo-dark/80">Recursos personalizados para aplicar en tu día a día.</p>
             </div>
-            <p className="text-sm font-medium text-nexo-dark/80">Recursos personalizados para aplicar en tu día a día.</p>
           </div>
+
+          {/* Paginación / Dots (Solo Mobile) */}
+          <div className="flex md:hidden justify-center gap-2 mt-4">
+            {[0, 1, 2, 3].map((dotIndex) => (
+              <button
+                key={dotIndex}
+                onClick={() => scrollToTarget(dotIndex)}
+                className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                  activeIndex === dotIndex
+                    ? 'w-6 bg-nexo-blue'
+                    : 'w-2 bg-nexo-blue/20 hover:bg-nexo-blue/40'
+                }`}
+                aria-label={`Ver paso ${dotIndex + 1}`}
+              />
+            ))}
+          </div>
+
         </div>
 
       </section>
@@ -105,14 +184,11 @@ export const Programa = () => {
         
         {/* === VERSIÓN DESKTOP === */}
         <div className="hidden md:block relative w-full mt-10">
-          {/* Línea horizontal centrada perfectamente */}
           <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-nexo-sand/60 -translate-y-1/2 z-0"></div>
-
           <div className="flex justify-between relative z-10 w-full">
             
-            {/* Paso 1: Texto Abajo */}
             <div className="w-1/4 flex flex-col items-center">
-              <div className="h-24 w-full"></div> {/* Espaciador superior */}
+              <div className="h-24 w-full"></div>
               <div className="w-8 h-8 rounded-full bg-nexo-blue flex items-center justify-center border-4 border-white shadow-sm z-10">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
@@ -122,19 +198,17 @@ export const Programa = () => {
               </div>
             </div>
 
-            {/* Paso 2: Texto Arriba */}
             <div className="w-1/4 flex flex-col items-center">
               <div className="h-24 w-full pb-6 px-4 text-center flex flex-col justify-end">
                 <h4 className="font-bold text-nexo-dark text-sm mb-1">Sesiones semanales</h4>
                 <p className="text-xs text-nexo-dark/70 leading-relaxed">Acompañamiento profesional constante y enfocado.</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-nexo-sand flex items-center justify-center border-4 border-white shadow-sm z-10"></div>
-              <div className="h-24 w-full"></div> {/* Espaciador inferior */}
+              <div className="h-24 w-full"></div>
             </div>
 
-            {/* Paso 3: Texto Abajo */}
             <div className="w-1/4 flex flex-col items-center">
-              <div className="h-24 w-full"></div> {/* Espaciador superior */}
+              <div className="h-24 w-full"></div>
               <div className="w-8 h-8 rounded-full bg-nexo-sand flex items-center justify-center border-4 border-white shadow-sm z-10"></div>
               <div className="h-24 w-full pt-6 px-4 text-center">
                 <h4 className="font-bold text-nexo-dark text-sm mb-1">Recursos y ejercicios</h4>
@@ -142,7 +216,6 @@ export const Programa = () => {
               </div>
             </div>
 
-            {/* Paso 4: Texto Arriba */}
             <div className="w-1/4 flex flex-col items-center">
               <div className="h-24 w-full pb-6 px-4 text-center flex flex-col justify-end">
                 <h4 className="font-bold text-nexo-dark text-sm mb-1">Cierre y proyección</h4>
@@ -151,7 +224,7 @@ export const Programa = () => {
               <div className="w-8 h-8 rounded-full bg-nexo-green flex items-center justify-center border-4 border-white shadow-sm z-10">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
               </div>
-              <div className="h-24 w-full"></div> {/* Espaciador inferior */}
+              <div className="h-24 w-full"></div>
             </div>
 
           </div>
@@ -159,7 +232,6 @@ export const Programa = () => {
 
         {/* === VERSIÓN MOBILE === */}
         <div className="md:hidden relative ml-4 mt-8">
-          {/* Línea vertical */}
           <div className="absolute left-[15px] top-4 bottom-4 w-[2px] bg-nexo-sand/60"></div>
           
           <div className="flex flex-col gap-10 relative z-10">
@@ -203,7 +275,7 @@ export const Programa = () => {
 
       </section>
 
-      {/* 5. CTA (Call to Action) - Cambiamos los colores para separarlo del Footer */}
+      {/* 5. CTA (Call to Action) */}
       <section className="w-full bg-nexo-sand/30 text-center py-24 px-6 relative z-20">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-nexo-dark mb-6">
