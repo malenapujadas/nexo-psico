@@ -29,12 +29,13 @@ export const Hero = () => {
         </p>
         
         {/* Botón con animación, delay y sombra mejorada */}
-        <button className="bg-nexo-blue text-white px-8 py-3 rounded-lg font-semibold 
+        <a className="bg-nexo-blue text-white px-8 py-3 rounded-lg font-semibold 
           hover:bg-nexo-dark transition-all duration-300 transform hover:-translate-y-1
           animate-fade-in-up animation-delay-400
-          shadow-[0_10px_20px_-5px_rgba(126,149,163,0.4)] hover:shadow-[0_15px_25px_-5px_rgba(126,149,163,0.5)]">
+          shadow-[0_10px_20px_-5px_rgba(126,149,163,0.4)] hover:shadow-[0_15px_25px_-5px_rgba(126,149,163,0.5)]"
+          href="https://wa.me/1156158104" >
           Contactanos
-        </button>
+        </a>
       </div>
     </section>
   );

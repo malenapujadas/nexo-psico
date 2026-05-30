@@ -115,9 +115,11 @@ export const Supervisiones = () => {
               ))}
             </div>
             
-            <button className="bg-nexo-dark text-white px-8 py-3 rounded-lg font-semibold hover:bg-nexo-dark/80 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1">
+            <a 
+              className="bg-nexo-dark text-white px-8 py-3 rounded-lg font-semibold hover:bg-nexo-dark/80 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1"
+              href="https://wa.me/1156158104">
               Coordinar encuentro
-            </button>
+            </a>
           </div>
 
           {/* Lado Derecho: Acordeón Minimalista (Tono Oscuro) */}

@@ -51,7 +51,7 @@ export const Footer = () => {
           
           {/* WhatsApp */}
           <a 
-            href="https://wa.me/TUNUMERODEWHATSAPP" 
+            href="https://wa.me/1156158104" 
             target="_blank" 
             rel="noopener noreferrer"
             className="p-3 bg-white/5 hover:bg-white/10 text-nexo-bg hover:text-nexo-sand rounded-full transition-all duration-300 transform hover:-translate-y-1"

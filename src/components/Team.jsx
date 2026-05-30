@@ -14,7 +14,7 @@ export const Team = () => {
     {
       name: "Lic. Emilce Gauna",
       role: "Psicóloga Clínica",
-      description: "Especialización en área clínica, psicodiagnóstico y evaluación Neurocognitiva. Perito de oficio.",
+      description: "Especialización en área clínica, psicodiagnóstico y evaluación Neurocognitiva. Perito oficial del poder judicial de la nación y docente UBA",
       image: imgEmilce
     },
     {

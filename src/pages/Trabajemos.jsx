@@ -98,9 +98,11 @@ export const Trabajemos = () => {
             <p className="text-lg text-nexo-dark/80 leading-relaxed mb-10">
               Para garantizar la excelencia en nuestra red, buscamos profesionales con <strong>título habilitante</strong> y <strong>matrícula vigente</strong>, que sostengan una <strong>formación continua</strong> y una <strong>visión responsable</strong> de la clínica. Valoramos especialmente la <strong>disposición</strong> para el trabajo interdisciplinario y el <strong>compromiso</strong> con los valores humanos que nos definen.
             </p>
-            <button className="bg-nexo-dark text-white px-10 py-3.5 rounded-lg font-semibold hover:bg-nexo-blue transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+            <a 
+              href="mailto:Nexopsicored@gmail.com?subject=Postulación para sumarme al equipo NexoPsico&body=Hola equipo, les escribo para postularme..."
+              className="bg-nexo-dark text-white px-10 py-3.5 rounded-lg font-semibold hover:bg-nexo-blue transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
               Enviar mi postulación
-            </button>
+            </a>
           </div>
 
           <div className="flex flex-col gap-6">
