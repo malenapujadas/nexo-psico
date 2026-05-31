@@ -77,7 +77,7 @@ export const Footer = () => {
 
           {/* Facebook */}
           <a 
-            href="https://facebook.com" 
+            href="https://www.facebook.com/share/1BCF3FB5pB/?mibextid=wwXIfr" 
             target="_blank" 
             rel="noopener noreferrer"
             className="p-3 bg-white/5 hover:bg-white/10 text-nexo-bg hover:text-nexo-sand rounded-full transition-all duration-300 transform hover:-translate-y-1"
@@ -90,7 +90,7 @@ export const Footer = () => {
 
           {/* LinkedIn */}
           <a 
-            href="https://linkedin.com" 
+            href="https://www.linkedin.com/company/nexopsico/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="p-3 bg-white/5 hover:bg-white/10 text-nexo-bg hover:text-nexo-sand rounded-full transition-all duration-300 transform hover:-translate-y-1"

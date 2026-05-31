@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import servicioPsicoterapia from '../assets/servicio-psicoterapia.png';
-import servicioVocacional from '../assets/servicio-vocacional.png';
+import servicioVocacional from '../assets/servicio-vocacional.jpg';
 import servicioPareja from '../assets/servicio-pareja.png';
 
 export const Services = () => {

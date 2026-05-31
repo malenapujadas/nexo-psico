@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 export const Contacto = () => {
-  // 1. Estado para guardar los datos del formulario
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -9,17 +8,18 @@ export const Contacto = () => {
     mensaje: ''
   });
 
-  // 2. Estado para guardar los mensajes de error
   const [errors, setErrors] = useState({});
+  
+  // NUEVOS ESTADOS PARA EL ENVÍO
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // Función para manejar los cambios en los inputs
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({
       ...formData,
       [id]: value
     });
-    // Si el usuario empieza a escribir, borramos el error de ese campo para que no le siga gritando
     if (errors[id]) {
       setErrors({
         ...errors,
@@ -28,13 +28,11 @@ export const Contacto = () => {
     }
   };
 
-  // 3. Lógica central de Validación
   const validateForm = () => {
     let newErrors = {};
 
-    // Validar Nombre
     const nombreTrimmed = formData.nombre.trim();
-    const nombreRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/; // Solo letras y espacios
+    const nombreRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/; 
     if (!nombreTrimmed) {
       newErrors.nombre = 'El nombre es obligatorio.';
     } else if (nombreTrimmed.length < 2) {
@@ -43,9 +41,7 @@ export const Contacto = () => {
       newErrors.nombre = 'El nombre solo puede contener letras.';
     }
 
-    // Validar Email
     const emailTrimmed = formData.email.trim();
-    // Expresión regular robusta para emails
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailTrimmed) {
       newErrors.email = 'El correo es obligatorio.';
@@ -55,12 +51,10 @@ export const Contacto = () => {
       newErrors.email = 'Ingresá un formato de correo electrónico válido.';
     }
 
-    // Validar Motivo
     if (!formData.motivo) {
       newErrors.motivo = 'Por favor, seleccioná el motivo de tu consulta.';
     }
 
-    // Validar Mensaje
     const mensajeTrimmed = formData.mensaje.trim();
     if (!mensajeTrimmed) {
       newErrors.mensaje = 'El mensaje no puede estar vacío.';
@@ -69,26 +63,38 @@ export const Contacto = () => {
     }
 
     setErrors(newErrors);
-    
-    // Si el objeto de errores está vacío, significa que el formulario es 100% válido
     return Object.keys(newErrors).length === 0;
   };
 
-  // 4. Función al enviar el formulario
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Evitamos que la página se recargue
-
+  // LÓGICA DE ENVÍO REAL ADAPTADA PARA FORMSPREE
+  const handleSubmit = async (e) => {
+    e.preventDefault(); 
     const isValid = validateForm();
 
     if (isValid) {
-      // Acá iría la conexión real con EmailJS o Formspree
-      console.log('Formulario perfecto. Datos listos para enviar:', formData);
-      alert("¡Formulario validado con éxito! Mirá la consola.");
-      
-      // Opcional: Limpiar el formulario después del envío exitoso
-      /* setFormData({ nombre: '', email: '', motivo: '', mensaje: '' }); */
-    } else {
-      console.log('Hay errores en el formulario.');
+      setIsSubmitting(true); // Cambiamos el botón a "Enviando..."
+
+      try {
+        // ACÁ REEMPLAZÁS "TU_ID_DE_FORMSPREE" POR EL TUYO (ej: xxyzabcd)
+        const response = await fetch("https://formspree.io/f/xqejvajp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          setIsSuccess(true); // Mostramos el mensaje de éxito
+          setFormData({ nombre: '', email: '', motivo: '', mensaje: '' }); // Limpiamos
+        } else {
+          alert("Hubo un problema al enviar el mensaje. Por favor, intentá de nuevo.");
+        }
+      } catch (error) {
+        alert("Error de conexión. Revisá tu internet e intentá nuevamente.");
+      } finally {
+        setIsSubmitting(false); // Volvemos el botón a la normalidad
+      }
     }
   };
 
@@ -109,100 +115,131 @@ export const Contacto = () => {
           </p>
         </div>
 
-        {/* Lado Derecho: Formulario */}
+        {/* Lado Derecho: Formulario o Mensaje de Éxito */}
         <div className="bg-white">
-          <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
-            
-            {/* Campo: Nombre */}
-            <div className="flex flex-col gap-2 relative">
-              <label htmlFor="nombre" className="text-sm font-medium text-nexo-dark italic">
-                ¿Cómo te gustaría que te llamemos? *
-              </label>
-              <input 
-                type="text" 
-                id="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                placeholder="Nombre"
-                className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic
-                  ${errors.nombre ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}`}
-              />
-              {errors.nombre && <span className="text-red-500 text-xs font-medium pl-1">{errors.nombre}</span>}
-            </div>
-
-            {/* Campo: Email */}
-            <div className="flex flex-col gap-2 relative">
-              <label htmlFor="email" className="text-sm font-medium text-nexo-dark italic">
-                Tu correo electrónico *
-              </label>
-              <input 
-                type="email" 
-                id="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="ejemplo@gmail.com"
-                className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic
-                  ${errors.email ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}`}
-              />
-              {errors.email && <span className="text-red-500 text-xs font-medium pl-1">{errors.email}</span>}
-            </div>
-
-            {/* Campo: Select Motivo */}
-            <div className="flex flex-col gap-2 relative">
-              <label htmlFor="motivo" className="text-sm font-medium text-nexo-dark italic">
-                Motivo de consulta *
-              </label>
-              <div className="relative">
-                <select 
-                  id="motivo"
-                  value={formData.motivo}
-                  onChange={handleChange}
-                  className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all appearance-none cursor-pointer italic
-                    ${errors.motivo ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}`}
-                >
-                  <option value="" disabled className="not-italic">Seleccioná una opción...</option>
-                  <option value="psicoterapia" className="not-italic">Psicoterapia / Terapia</option>
-                  <option value="evaluaciones" className="not-italic">Evaluaciones Psicológicas</option>
-                  <option value="aptos" className="not-italic">Aptos Psicológicos</option>
-                  <option value="orientacion" className="not-italic">Orientación Vocacional</option>
-                  <option value="supervision" className="not-italic">Supervisión Profesional</option>
-                  <option value="bienestar" className="not-italic">Programa de Bienestar</option>
-                  <option value="trabajemos" className="not-italic">Sumarme al equipo (Postulación)</option>
-                  <option value="otro" className="not-italic">Otro motivo</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-nexo-dark/50">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </div>
+          
+          {isSuccess ? (
+            // MENSAJE DE ÉXITO (Reemplaza al formulario)
+            <div className="h-full flex flex-col items-center justify-center text-center bg-nexo-sand/10 p-10 rounded-2xl border border-nexo-sand/30 animate-fade-in-up">
+              <div className="w-16 h-16 bg-nexo-green/20 text-nexo-green rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
               </div>
-              {errors.motivo && <span className="text-red-500 text-xs font-medium pl-1">{errors.motivo}</span>}
+              <h3 className="text-2xl font-bold text-nexo-dark mb-2">¡Mensaje enviado!</h3>
+              <p className="text-nexo-dark/80">
+                Gracias por escribirnos, {formData.nombre}. Recibimos tu consulta y te vamos a estar respondiendo muy pronto.
+              </p>
+              <button 
+                onClick={() => setIsSuccess(false)}
+                className="mt-8 text-sm font-semibold text-nexo-blue hover:text-nexo-dark transition-colors"
+              >
+                Enviar otro mensaje
+              </button>
             </div>
+          ) : (
+            // FORMULARIO
+            <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
+              
+              {/* Campo: Nombre */}
+              <div className="flex flex-col gap-2 relative">
+                <label htmlFor="nombre" className="text-sm font-medium text-nexo-dark italic">
+                  ¿Cómo te gustaría que te llamemos? *
+                </label>
+                <input 
+                  type="text" 
+                  id="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  placeholder="Nombre"
+                  disabled={isSubmitting}
+                  className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic
+                    ${errors.nombre ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}
+                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                />
+                {errors.nombre && <span className="text-red-500 text-xs font-medium pl-1">{errors.nombre}</span>}
+              </div>
 
-            {/* Campo: Mensaje */}
-            <div className="flex flex-col gap-2 relative">
-              <label htmlFor="mensaje" className="text-sm font-medium text-nexo-dark italic">
-                Contanos brevemente qué te trae por acá...
-              </label>
-              <textarea 
-                id="mensaje"
-                value={formData.mensaje}
-                onChange={handleChange}
-                rows="4"
-                placeholder="Escribí tu mensaje..."
-                className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic resize-none
-                  ${errors.mensaje ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}`}
-              ></textarea>
-              {errors.mensaje && <span className="text-red-500 text-xs font-medium pl-1">{errors.mensaje}</span>}
-            </div>
+              {/* Campo: Email */}
+              <div className="flex flex-col gap-2 relative">
+                <label htmlFor="email" className="text-sm font-medium text-nexo-dark italic">
+                  Tu correo electrónico *
+                </label>
+                <input 
+                  type="email" 
+                  id="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="ejemplo@gmail.com"
+                  disabled={isSubmitting}
+                  className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic
+                    ${errors.email ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}
+                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                />
+                {errors.email && <span className="text-red-500 text-xs font-medium pl-1">{errors.email}</span>}
+              </div>
 
-            {/* Botón de Enviar */}
-            <button 
-              type="submit"
-              className="mt-2 bg-nexo-dark text-white w-full md:w-auto self-start px-10 py-3.5 rounded-lg font-semibold hover:bg-nexo-blue transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
-            >
-              Enviar mensaje
-            </button>
+              {/* Campo: Select Motivo */}
+              <div className="flex flex-col gap-2 relative">
+                <label htmlFor="motivo" className="text-sm font-medium text-nexo-dark italic">
+                  Motivo de consulta *
+                </label>
+                <div className="relative">
+                  <select 
+                    id="motivo"
+                    value={formData.motivo}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                    className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all appearance-none cursor-pointer italic
+                      ${errors.motivo ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}
+                      ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="" disabled className="not-italic">Seleccioná una opción...</option>
+                    <option value="psicoterapia" className="not-italic">Psicoterapia / Terapia</option>
+                    <option value="evaluaciones" className="not-italic">Evaluaciones Psicológicas</option>
+                    <option value="aptos" className="not-italic">Aptos Psicológicos</option>
+                    <option value="orientacion" className="not-italic">Orientación Vocacional</option>
+                    <option value="supervision" className="not-italic">Supervisión Profesional</option>
+                    <option value="bienestar" className="not-italic">Programa de Bienestar</option>
+                    <option value="trabajemos" className="not-italic">Sumarme al equipo (Postulación)</option>
+                    <option value="otro" className="not-italic">Otro motivo</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-nexo-dark/50">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+                {errors.motivo && <span className="text-red-500 text-xs font-medium pl-1">{errors.motivo}</span>}
+              </div>
 
-          </form>
+              {/* Campo: Mensaje */}
+              <div className="flex flex-col gap-2 relative">
+                <label htmlFor="mensaje" className="text-sm font-medium text-nexo-dark italic">
+                  Contanos brevemente qué te trae por acá...
+                </label>
+                <textarea 
+                  id="mensaje"
+                  value={formData.mensaje}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  rows="4"
+                  placeholder="Escribí tu mensaje..."
+                  className={`w-full bg-nexo-sand/20 border rounded-xl px-4 py-3 text-nexo-dark outline-none transition-all placeholder-nexo-dark/30 italic resize-none
+                    ${errors.mensaje ? 'border-red-400 focus:border-red-500 bg-red-50/50' : 'border-transparent focus:border-nexo-blue/40'}
+                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                ></textarea>
+                {errors.mensaje && <span className="text-red-500 text-xs font-medium pl-1">{errors.mensaje}</span>}
+              </div>
+
+              {/* Botón de Enviar */}
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className={`mt-2 bg-nexo-dark text-white w-full md:w-auto self-start px-10 py-3.5 rounded-lg font-semibold shadow-md transition-all duration-300
+                  ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-nexo-blue hover:shadow-lg transform hover:-translate-y-1'}`}
+              >
+                {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
+              </button>
+
+            </form>
+          )}
         </div>
 
       </div>
