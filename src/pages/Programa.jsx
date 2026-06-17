@@ -284,10 +284,12 @@ export const Programa = () => {
           <p className="text-lg text-nexo-dark/70 mb-10">
             Para garantizar la profundidad de cada proceso, los cupos son limitados y abrimos solo unas pocas vacantes por mes.
           </p>
-          <button className="bg-nexo-dark text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-nexo-blue transition-all shadow-lg transform hover:-translate-y-1 mb-6">
+          <a
+           className="bg-nexo-dark text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-nexo-blue transition-all shadow-lg transform hover:-translate-y-1 mb-6"
+           href="mailto:Nexopsicored@gmail.com?subject=Entrevisa de admisión para el Programa de Bienestar&body=Hola equipo, les escribo para obtener mas información sobre el Programa de Bienestar...">
             Reservar mi entrevista de admisión
-          </button>
-          <p className="text-xs text-nexo-dark/50 max-w-sm mx-auto">
+          </a>
+          <p className="text-xs text-nexo-dark/50 max-w-sm mx-auto pt-8">
             Hablemos para ver si este programa es el nexo que estás necesitando hoy.
           </p>
         </div>

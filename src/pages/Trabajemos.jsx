@@ -6,10 +6,10 @@ export const Trabajemos = () => {
     <div className="min-h-screen bg-white">
       
       {/* 1. HERO Y TEXTO INTRODUCTORIO */}
-      <section className="w-full relative">
+      <section className="w-full relative pt-32">
         
         {/* Arco Superior (Imagen) - Le subimos un poco la intensidad al fondo arena para que mezcle bien */}
-        <div className="w-full h-[50vh] min-h-[400px] max-h-[600px] bg-nexo-sand/60 rounded-b-[4rem] md:rounded-b-[8rem] overflow-hidden relative shadow-inner mb-16 md:mb-24">
+        {/* <div className="w-full h-[50vh] min-h-[400px] max-h-[600px] bg-nexo-sand/60 rounded-b-[4rem] md:rounded-b-[8rem] overflow-hidden relative shadow-inner mb-16 md:mb-24">
           
           <img 
             src={heroTrabajemos} 
@@ -17,7 +17,7 @@ export const Trabajemos = () => {
             className="w-full h-full object-cover object-bottom opacity-[0.85]" 
           />
           
-        </div>
+        </div> */}
 
         {/* Textos */}
         <div className="max-w-4xl mx-auto px-6 md:px-12 text-center md:text-left animate-fade-in-up">

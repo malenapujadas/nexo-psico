@@ -15,7 +15,7 @@ export const DynamicTitle = () => {
       '/orientacion-vocacional': 'Orientación Vocacional - NexoPsico',
       '/supervisiones': 'Supervisiones - NexoPsico',
       '/trabajemos': 'Trabaja con nosotras - NexoPsico',
-      '/programa-bienestar': 'Programa de Bienestar - NexoPsico',
+      '/programa': 'Programa de Bienestar - NexoPsico',
       '/contacto': 'Contacto - NexoPsico',
     };
 
