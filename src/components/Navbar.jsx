@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom'; 
 import logo from '../assets/logo.png';
+import { useAuth } from './AuthContext'; 
 
 export const Navbar = () => {
+  const { usuario } = useAuth(); 
   const [isOpen, setIsOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
 
-  // Actualizamos los href por las rutas reales (las que aún no existen quedan con "#")
+  // Sacamos el login de acá para manejarlo por separado a la derecha
   const navLinks = [
     { name: 'Inicio', href: '/' },
     { 
@@ -22,29 +24,35 @@ export const Navbar = () => {
     },
     { name: 'Trabajemos', href: '/trabajemos' },
     { name: 'Programa Bienestar', href: '/programa' },
+    { name: 'Cuadernillos', href: '/cuadernillos' },  
     { name: 'Contacto', href: '/contacto' },
   ];
 
   return (
-    <nav className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl z-50 px-6 py-3 md:px-8 flex justify-between items-center bg-white/20 backdrop-blur-md rounded-full shadow-sm transition-all duration-300 border border-white/30">
+    <nav className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-7xl z-50 px-6 py-3 md:px-8 flex justify-between items-center bg-white/20 backdrop-blur-md rounded-full shadow-sm transition-all duration-300 border border-white/30">
       
-      <div className="flex items-center">
-        {/* Reemplazamos la etiqueta 'a' por 'Link' */}
+      {/* 1. IZQUIERDA: Logo */}
+      <div className="flex w-1/4 justify-start items-center">
         <Link to="/">
           <img src={logo} alt="Nexo Logo" className="h-8 md:h-10 w-auto" />
         </Link>
       </div>
 
-      <div className="hidden md:flex gap-8 items-center">
+      {/* 2. CENTRO: Links principales */}
+      <div className="hidden md:flex flex-grow justify-center gap-4 lg:gap-8 items-center">
         {navLinks.map((link) => (
           <div key={link.name} className="relative group">
             <Link 
               to={link.href}
-              className="text-nexo-dark text-sm font-semibold hover:text-nexo-green transition-colors duration-300 py-4"
+              className={`whitespace-nowrap flex items-center text-sm font-semibold transition-colors duration-300 py-4 ${
+                link.name === 'Mi Perfil' 
+                  ? 'text-nexo-blue hover:text-nexo-dark' 
+                  : 'text-nexo-dark hover:text-nexo-green'
+              }`}
             >
               {link.name}
               {link.dropdown && (
-                <svg className="w-4 h-4 inline-block ml-1 -mt-1 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               )}
@@ -69,10 +77,34 @@ export const Navbar = () => {
         ))}
       </div>
 
-      <div className="md:hidden flex items-center">
+      {/* 3. DERECHA: Botón de Sesión y Hamburguesa (Cambiamos flex-1 por w-1/4) */}
+      <div className="flex w-1/4 justify-end items-center gap-4">
+        
+        {/* Botón Desktop con Ícono */}
+        <div className="hidden md:block">
+          {usuario ? (
+            <Link 
+              to="/perfil" 
+              className="flex items-center gap-2 text-sm font-semibold text-nexo-blue hover:text-nexo-dark transition-colors bg-white/60 border border-nexo-blue/20 px-4 py-2 rounded-full shadow-sm whitespace-nowrap"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              Mi Perfil
+            </Link>
+          ) : (
+            <Link 
+              to="/iniciar-sesion" 
+              className="flex items-center gap-2 text-sm font-semibold text-nexo-dark hover:text-nexo-green transition-colors bg-white/40 border border-nexo-sand/50 px-4 py-2 rounded-full shadow-sm hover:bg-white/70 whitespace-nowrap"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              Iniciar Sesión
+            </Link>
+          )}
+        </div>
+
+        {/* Botón Menú Mobile */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="text-nexo-dark hover:text-nexo-green transition-colors focus:outline-none"
+          className="md:hidden text-nexo-dark hover:text-nexo-green transition-colors focus:outline-none"
         >
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
@@ -80,6 +112,7 @@ export const Navbar = () => {
         </button>
       </div>
 
+      {/* Menú Mobile Desplegable */}
       {isOpen && (
         <div className="absolute top-full mt-4 left-0 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg md:hidden flex flex-col py-6 px-6 gap-4 border border-nexo-sand/20">
           {navLinks.map((link) => (
@@ -96,7 +129,7 @@ export const Navbar = () => {
               >
                 <Link 
                   to={link.href}
-                  className="text-nexo-dark font-medium text-lg hover:text-nexo-green transition-colors py-2"
+                  className="font-medium text-lg text-nexo-dark hover:text-nexo-green transition-colors py-2"
                   onClick={() => !link.dropdown && setIsOpen(false)}
                 >
                   {link.name}
@@ -124,6 +157,30 @@ export const Navbar = () => {
               )}
             </div>
           ))}
+          
+          {/* Botón de Sesión en Mobile */}
+          <div className="border-t border-nexo-sand/30 pt-4 mt-2">
+            {usuario ? (
+              <Link 
+                to="/perfil" 
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 font-medium text-lg text-nexo-blue py-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                Mi Perfil
+              </Link>
+            ) : (
+              <Link 
+                to="/iniciar-sesion" 
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 font-medium text-lg text-nexo-dark hover:text-nexo-green py-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                Iniciar Sesión
+              </Link>
+            )}
+          </div>
+
         </div>
       )}
     </nav>
