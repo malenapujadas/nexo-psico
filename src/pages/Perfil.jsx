@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { supabase } from '../supabase';
@@ -7,26 +7,69 @@ export const Perfil = () => {
   const { usuario, cerrarSesion } = useAuth();
   const navigate = useNavigate();
 
-  // CIBERSEGURIDAD: Si no hay usuario logueado, lo expulsamos al login
+  // Estados para el cambio de contraseña interno
+  const [mostrarFormClave, setMostrarFormClave] = useState(false);
+  const [nuevaPassword, setNuevaPassword] = useState('');
+  const [cargandoClave, setCargandoClave] = useState(false);
+  const [feedbackClave, setFeedbackClave] = useState({ tipo: '', mensaje: '' });
+  const [mostrarOjito, setMostrarOjito] = useState(false);
+
+  // Regex de Seguridad (la misma que en Auth)
+  const passwordSegura = /^(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+
+  // 🛡️ CIBERSEGURIDAD: Expulsar si no hay usuario
   useEffect(() => {
     if (!usuario) {
-      navigate('/iniciar-sesion'); // Ajustá esta ruta según tu App.jsx
+      navigate('/iniciar-sesion');
     }
   }, [usuario, navigate]);
 
-  if (!usuario) return null; // Evita un "parpadeo" visual de la página antes de redirigir
+  if (!usuario) return null; 
 
-  const handleRestablecerClave = async () => {
+  const handleActualizarClave = async (e) => {
+    e.preventDefault();
+    setFeedbackClave({ tipo: '', mensaje: '' });
+
+    const passwordLimpia = nuevaPassword.trim();
+
+    if (!passwordSegura.test(passwordLimpia)) {
+      setFeedbackClave({ 
+        tipo: 'error', 
+        mensaje: 'Debe tener al menos 8 caracteres, una mayúscula y un número.' 
+      });
+      return;
+    }
+
+    setCargandoClave(true);
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(usuario.email);
+      // 🔥 ACÁ ESTÁ LA MAGIA: Actualizamos directamente desde adentro
+      const { error } = await supabase.auth.updateUser({
+        password: passwordLimpia
+      });
+
       if (error) throw error;
-      alert(`Te enviamos un correo seguro a ${usuario.email} para cambiar tu contraseña.`);
+
+      setFeedbackClave({ 
+        tipo: 'exito', 
+        mensaje: '¡Tu contraseña se actualizó correctamente!' 
+      });
+      setNuevaPassword('');
+      
+      // Ocultamos el formulario después de 3 segundos
+      setTimeout(() => {
+        setMostrarFormClave(false);
+        setFeedbackClave({ tipo: '', mensaje: '' });
+      }, 3000);
+
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      setFeedbackClave({ tipo: 'error', mensaje: err.message });
+    } finally {
+      setCargandoClave(false);
     }
   };
 
-  // Datos simulados de compras por ahora (luego vendrán de la base de datos)
+  // Datos simulados de compras
   const misCuadernillos = []; 
 
   return (
@@ -35,7 +78,7 @@ export const Perfil = () => {
         
         {/* Cabecera del Perfil */}
         <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-nexo-sand/30 mb-8 animate-fade-in-up">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div>
               <span className="text-xs font-bold text-nexo-blue tracking-wide uppercase bg-nexo-sand/20 px-3 py-1 rounded-full">
                 Cuenta Verificada
@@ -48,13 +91,13 @@ export const Perfil = () => {
               </p>
             </div>
             
-            {/* Botones de Gestión de Cuenta */}
-            <div className="flex flex-wrap gap-3">
+            {/* Botones de Gestión (Alineados arriba a la derecha) */}
+            <div className="flex flex-wrap md:flex-col gap-3 md:items-end">
               <button 
-                onClick={handleRestablecerClave}
+                onClick={() => setMostrarFormClave(!mostrarFormClave)}
                 className="px-4 py-2.5 text-xs font-semibold text-nexo-dark bg-nexo-bg rounded-xl hover:bg-nexo-sand/40 transition-all border border-nexo-sand/30"
               >
-                Cambiar Contraseña
+                {mostrarFormClave ? 'Cancelar cambio' : 'Cambiar Contraseña'}
               </button>
               <button 
                 onClick={cerrarSesion}
@@ -64,6 +107,57 @@ export const Perfil = () => {
               </button>
             </div>
           </div>
+
+          {/* Formulario Desplegable para cambiar clave */}
+          {mostrarFormClave && (
+            <div className="mt-8 pt-6 border-t border-nexo-sand/30 animate-fade-in-up">
+              <h3 className="text-sm font-bold text-nexo-dark mb-4">Ingresá tu nueva contraseña</h3>
+              <form onSubmit={handleActualizarClave} className="max-w-sm" noValidate>
+                <div className="relative mb-3">
+                  <input
+                    type={mostrarOjito ? "text" : "password"}
+                    value={nuevaPassword}
+                    onChange={(e) => {
+                      setNuevaPassword(e.target.value);
+                      if (feedbackClave.tipo === 'error') setFeedbackClave({ tipo: '', mensaje: '' });
+                    }}
+                    disabled={cargandoClave}
+                    placeholder="••••••••"
+                    className={`block w-full rounded-xl border-0 py-2.5 pl-4 pr-12 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-colors
+                      ${feedbackClave.tipo === 'error' 
+                        ? 'ring-red-500 focus:ring-red-500 text-red-900 bg-red-50/30' 
+                        : 'text-nexo-dark ring-nexo-sand/50 focus:ring-nexo-blue'}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarOjito(!mostrarOjito)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-nexo-dark/40 hover:text-nexo-dark focus:outline-none"
+                  >
+                    {mostrarOjito ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    )}
+                  </button>
+                </div>
+
+                {/* Feedback */}
+                {feedbackClave.mensaje && (
+                  <p className={`text-sm mb-3 flex items-center gap-1 ${feedbackClave.tipo === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+                    {feedbackClave.tipo === 'error' ? '⚠️' : '✅'} {feedbackClave.mensaje}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={cargandoClave || !nuevaPassword.trim()}
+                  className="w-full justify-center rounded-xl bg-nexo-dark px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nexo-blue transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {cargandoClave ? 'Guardando...' : 'Guardar nueva contraseña'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
 
         {/* Sección de Materiales Adquiridos */}
@@ -74,14 +168,12 @@ export const Perfil = () => {
           </h2>
 
           {misCuadernillos.length === 0 ? (
-            // Estado vacío (UX: Qué pasa si todavía no compró nada)
             <div className="text-center py-12 border-2 border-dashed border-nexo-sand/40 rounded-2xl">
               <svg className="w-12 h-12 text-nexo-dark/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
               <p className="text-nexo-dark/60 font-medium mb-2">Todavía no adquiriste ningún material</p>
               <p className="text-xs text-nexo-dark/40 max-w-sm mx-auto">Cuando compres un cuadernillo en nuestro catálogo, vas a poder descargarlo en formato PDF directamente desde acá las veces que quieras.</p>
             </div>
           ) : (
-            // Lista de cuadernillos comprados (La armaremos cuando tengamos la BD de compras)
             <div className="grid grid-cols-1 gap-4">
               {/* Mapeo futuro de compras */}
             </div>

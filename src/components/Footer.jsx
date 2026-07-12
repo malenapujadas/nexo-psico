@@ -16,38 +16,39 @@ export const Footer = () => {
     },
     { name: 'Trabajemos', href: '/trabajemos' },
     { name: 'Programa Bienestar', href: '/programa' },
+    { name: 'Cuadernillos', href: '/cuadernillos' },
     { name: 'Contacto', href: '/contacto' },
   ];
 
   return (
     <footer className="bg-nexo-dark text-nexo-bg pt-16 pb-8 px-6 md:px-12 relative z-10">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 pb-12 border-b border-nexo-sand/20">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 pb-12 border-b border-nexo-sand/20">
         
-        {/* Lado Izquierdo: Nombre de Marca / Isologo en texto */}
-        <div className="text-center md:text-left">
+        {/* Lado Izquierdo: Ocupa 1/4 del espacio en Desktop */}
+        <div className="w-full md:w-1/4 text-center md:text-left">
           <a href="#" className="text-2xl font-bold tracking-widest text-nexo-sand block mb-2">
             NEXO
           </a>
-          <p className="text-sm text-nexo-bg/60 max-w-xs">
+          <p className="text-sm text-nexo-bg/60 max-w-xs mx-auto md:mx-0">
             El punto de encuentro con tu Salud Mental.
           </p>
         </div>
 
-        {/* Centro: Links Internos Reutilizados */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+        {/* Centro: Ocupa el espacio restante y prohíbe el salto de línea en Desktop */}
+        <div className="w-full md:flex-grow flex flex-wrap md:flex-nowrap justify-center gap-4 lg:gap-6">
           {internalLinks.map((link) => (
             <Link 
               key={link.name} 
               to={link.href}
-              className="text-sm font-medium text-nexo-bg/80 hover:text-nexo-sand transition-colors duration-300"
+              className="whitespace-nowrap text-sm font-medium text-nexo-bg/80 hover:text-nexo-sand transition-colors duration-300"
             >
               {link.name}
             </Link>
           ))}
         </div>
 
-        {/* Lado Derecho: Iconos de Redes Sociales (SVG) */}
-        <div className="flex gap-3">
+        {/* Lado Derecho: Ocupa 1/4 del espacio en Desktop y tira los íconos a la derecha */}
+        <div className="w-full md:w-1/4 flex justify-center md:justify-end gap-3">
           
           {/* WhatsApp */}
           <a 
@@ -106,13 +107,10 @@ export const Footer = () => {
       </div>
 
       {/* Barra Inferior de Derechos Autorales */}
-      <div className="max-w-6xl mx-auto pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-nexo-bg/40 gap-4">
+      <div className="max-w-7xl mx-auto pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-nexo-bg/40 gap-4">
         <p>© {new Date().getFullYear()} Nexo Psico. Todos los derechos reservados.</p>
         <p>Diseñado & Desarrollado con ❤️</p>
       </div>
     </footer>
   );
 };
-
-
-

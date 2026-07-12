@@ -14,7 +14,7 @@ export const Team = () => {
     {
       name: "Lic. Emilce Gauna",
       role: "Psicóloga Clínica",
-      description: "Especialización en área clínica, psicodiagnóstico y evaluación Neurocognitiva. Perito oficial del poder judicial de la nación y docente UBA",
+      description: "Especialización en área clínica, psicodiagnóstico y evaluación Neurocognitiva. Perito oficial del poder judicial de la nación y docente UBA.",
       image: imgEmilce
     },
     {
@@ -53,7 +53,6 @@ export const Team = () => {
   const handleScroll = () => {
     if (!sliderRef.current) return;
     const scrollPosition = sliderRef.current.scrollLeft;
-    // Ancho de la tarjeta + el espacio (gap-6 = 24px)
     const cardWidth = sliderRef.current.children[0].offsetWidth + 24; 
     const newIndex = Math.round(scrollPosition / cardWidth);
     if (newIndex !== activeIndex) setActiveIndex(newIndex);
@@ -68,12 +67,20 @@ export const Team = () => {
     });
   };
 
+  // Lógica para las flechas
+  const handlePrev = () => {
+    if (activeIndex > 0) scrollToSlide(activeIndex - 1);
+  };
+
+  const handleNext = () => {
+    if (activeIndex < teamList.length - 1) scrollToSlide(activeIndex + 1);
+  };
+
   return (
     <section className="w-full py-24 bg-white overflow-hidden">
-      {/* Contenedor principal: alinea los elementos arriba (items-start) */}
       <div className="w-full max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center lg:items-start px-6 md:px-12 gap-12 lg:gap-16">
         
-        {/* COLUMNA 1: TEXTOS (Ahora alineada a la izquierda, ocupando aprox 40% en compu) */}
+        {/* COLUMNA 1: TEXTOS */}
         <div className="w-full lg:w-5/12 flex-shrink-0 text-center lg:text-left animate-fade-in-up mt-0 lg:mt-12">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-6 leading-tight">
             Tres miradas,<br className="hidden lg:block" /> un mismo compromiso
@@ -83,10 +90,10 @@ export const Team = () => {
           </p>
         </div>
 
-        {/* COLUMNA 2: CARRUSEL Y PAGINACIÓN (Ahora ocupa el 60% restante) */}
+        {/* COLUMNA 2: CARRUSEL Y PAGINACIÓN */}
         <div className="w-full lg:w-7/12 flex-shrink-0 relative animate-fade-in-up animation-delay-200">
           
-          {/* Contenedor deslizable (solo esto hace scroll) */}
+          {/* Contenedor deslizable */}
           <div 
             ref={sliderRef}
             onMouseDown={handleMouseDown}
@@ -101,8 +108,8 @@ export const Team = () => {
             {teamList.map((member, index) => (
               <div 
                 key={index}
-                // Ancho ajustado para que entre mejor en el nuevo layout
-                className="flex-none w-[85%] md:w-[60%] lg:w-[50%] snap-start flex flex-col group transition-transform duration-300 hover:-translate-y-2"
+                // 🔥 ACÁ ESTÁ LA MAGIA: lg:w-[65%] hace que la segunda tarjeta quede cortada
+                className="flex-none w-[85%] md:w-[60%] lg:w-[65%] snap-start flex flex-col group transition-transform duration-300 hover:-translate-y-2"
               >
                 {/* Imagen */}
                 <div className="w-full aspect-[4/5] mb-6 rounded-[2.5rem] overflow-hidden shadow-lg border border-nexo-sand/10">
@@ -129,19 +136,44 @@ export const Team = () => {
             ))}
           </div>
 
-          {/* Paginación */}
-          <div className="flex justify-center lg:justify-start lg:pl-4 gap-3 mt-6">
-            {teamList.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToSlide(index)}
-                className={`h-[3px] rounded-full transition-all duration-300 focus:outline-none
-                  ${activeIndex === index 
-                    ? 'w-10 bg-nexo-dark' 
-                    : 'w-6 bg-nexo-dark/20 hover:bg-nexo-dark/40'}`}
-                aria-label={`Ir a profesional ${index + 1}`}
-              />
-            ))}
+          {/* Paginación con Flechas */}
+          <div className="flex items-center justify-center lg:justify-start lg:pl-4 gap-4 mt-6">
+            
+            {/* Botón Anterior */}
+            <button 
+              onClick={handlePrev}
+              disabled={activeIndex === 0}
+              className="p-2 rounded-full border border-nexo-sand/50 text-nexo-dark hover:bg-nexo-sand/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              aria-label="Ver profesional anterior"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+
+            {/* Puntitos */}
+            <div className="flex gap-3">
+              {teamList.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToSlide(index)}
+                  className={`h-[3px] rounded-full transition-all duration-300 focus:outline-none
+                    ${activeIndex === index 
+                      ? 'w-10 bg-nexo-dark' 
+                      : 'w-6 bg-nexo-dark/20 hover:bg-nexo-dark/40'}`}
+                  aria-label={`Ir a profesional ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Botón Siguiente */}
+            <button 
+              onClick={handleNext}
+              disabled={activeIndex === teamList.length - 1}
+              className="p-2 rounded-full border border-nexo-sand/50 text-nexo-dark hover:bg-nexo-sand/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              aria-label="Ver siguiente profesional"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
+
           </div>
 
         </div>
