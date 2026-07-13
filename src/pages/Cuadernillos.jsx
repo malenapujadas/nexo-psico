@@ -36,10 +36,13 @@ export const Cuadernillos = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pt-32 pb-24">
+    <div className="min-h-screen bg-white pt-36 pb-24">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
         
-        <div className="text-center max-w-2xl mx-auto mb-16 animate-fade-in-up">
+        <div className="max-w-3xl mb-16 md:mb-24 animate-fade-in-up">
+          <h2 className="text-sm font-bold text-nexo-green uppercase tracking-widest mb-4">
+            Nuestros Materiales
+          </h2>
           <h1 className="text-3xl md:text-5xl font-semibold text-nexo-dark mb-6">
             Materiales Descargables
           </h1>

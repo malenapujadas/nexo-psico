@@ -26,7 +26,7 @@ export const ServicesIntro = () => {
       <div className="max-w-6xl mx-auto">
         
         {/* Bloque Introductorio */}
-        <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
+        <div className="text-left md:text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-6">
             Construyendo vínculos sólidos
           </h2>

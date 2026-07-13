@@ -136,7 +136,7 @@ export const Testimonials = () => {
       <div className="max-w-7xl mx-auto relative">
         
         {/* Encabezado */}
-        <div className="text-center max-w-2xl mx-auto mb-16 animate-fade-in-up">
+        <div className="text-left md:text-center max-w-2xl mx-auto mb-16 animate-fade-in-up">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-4">
             Experiencias que transforman
           </h2>

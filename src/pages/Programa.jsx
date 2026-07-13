@@ -38,10 +38,13 @@ export const Programa = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-32">
+    <div className="min-h-screen bg-white pt-36">
       
       {/* 1. HERO */}
-      <section className="max-w-4xl mx-auto px-6 md:px-12 mb-20 md:mb-32 animate-fade-in-up">
+      <section className="max-w-6xl mx-auto px-6 md:px-12 mb-20 md:mb-32 animate-fade-in-up">
+        <h2 className="text-sm font-bold text-nexo-green uppercase tracking-widest mb-4">
+            Programa Bienestar
+        </h2>
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-nexo-dark mb-6 leading-tight">
           Recuperá el <span className="font-medium">mando</span> de tu vida: <br className="hidden md:block"/>
           <span className="font-medium">Programa de Bienestar Mental.</span>
@@ -55,7 +58,7 @@ export const Programa = () => {
       <section className="w-full bg-nexo-sand/20 py-20 md:py-32">
         <div className="max-w-6xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
-          <div className="flex flex-col gap-4 items-start md:items-end md:pr-10">
+          <div className="flex flex-col gap-4 items-start md:items-start md:pr-10">
             <div className="bg-white border border-nexo-sand/50 px-6 py-3 rounded-full shadow-sm text-sm md:text-base text-nexo-dark font-medium transform transition hover:-translate-y-1">
               ¿Sentís que el trabajo avanza más rápido que vos?
             </div>
@@ -285,7 +288,7 @@ export const Programa = () => {
             Para garantizar la profundidad de cada proceso, los cupos son limitados y abrimos solo unas pocas vacantes por mes.
           </p>
           <a
-           className="bg-nexo-dark text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-nexo-blue transition-all shadow-lg transform hover:-translate-y-1 mb-6"
+           className="inline-block bg-nexo-dark text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-nexo-blue transition-all shadow-lg transform hover:-translate-y-1 mb-6"
            href="mailto:Nexopsicored@gmail.com?subject=Entrevisa de admisión para el Programa de Bienestar&body=Hola equipo, les escribo para obtener mas información sobre el Programa de Bienestar...">
             Reservar mi entrevista de admisión
           </a>
@@ -294,7 +297,6 @@ export const Programa = () => {
           </p>
         </div>
       </section>
-
     </div>
   );
 };

@@ -96,7 +96,7 @@ export const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-nexo-bg flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-nexo-bg flex flex-col justify-center py-12 px-5 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md animate-fade-in-up">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-nexo-dark">
           {vista === 'login' && 'Iniciar sesión'}
@@ -111,7 +111,7 @@ export const Auth = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-sm border border-nexo-sand/30 sm:rounded-2xl sm:px-10">
+        <div className="bg-white py-8 px-6 shadow-sm border border-nexo-sand/30 rounded-2xl sm:px-10">
           
           {/* Le agregamos noValidate al form para desactivar los carteles genéricos del navegador y usar los nuestros */}
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>

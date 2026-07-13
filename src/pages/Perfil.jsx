@@ -43,7 +43,7 @@ export const Perfil = () => {
     setCargandoClave(true);
 
     try {
-      // 🔥 ACÁ ESTÁ LA MAGIA: Actualizamos directamente desde adentro
+      // Actualizamos directamente desde adentro
       const { error } = await supabase.auth.updateUser({
         password: passwordLimpia
       });
@@ -70,7 +70,15 @@ export const Perfil = () => {
   };
 
   // Datos simulados de compras
-  const misCuadernillos = []; 
+  const misCuadernillos = [
+    {
+      id: '1',
+      titulo: 'Cuadernillo de herramientas para la ansiedad',
+      fechaCompra: '12 de Julio de 2026',
+      // Usamos un PDF de prueba público de internet para simular la descarga
+      urlDescarga: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' 
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-nexo-bg pt-32 pb-24">
@@ -92,7 +100,7 @@ export const Perfil = () => {
             </div>
             
             {/* Botones de Gestión (Alineados arriba a la derecha) */}
-            <div className="flex flex-wrap md:flex-col gap-3 md:items-end">
+            <div className="flex flex-wrap md:items-center gap-3">
               <button 
                 onClick={() => setMostrarFormClave(!mostrarFormClave)}
                 className="px-4 py-2.5 text-xs font-semibold text-nexo-dark bg-nexo-bg rounded-xl hover:bg-nexo-sand/40 transition-all border border-nexo-sand/30"
@@ -162,7 +170,7 @@ export const Perfil = () => {
 
         {/* Sección de Materiales Adquiridos */}
         <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-nexo-sand/30 animate-fade-in-up delay-100">
-          <h2 className="text-xl font-bold text-nexo-dark mb-6 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-nexo-dark mb-6 flex items-center gap-4">
             <svg className="w-5 h-5 text-nexo-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             Mis Cuadernillos Descargables
           </h2>
@@ -175,7 +183,32 @@ export const Perfil = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {/* Mapeo futuro de compras */}
+              {misCuadernillos.map((item) => (
+                <div key={item.id} className="flex flex-col md:flex-row items-center justify-between p-5 bg-nexo-bg/40 rounded-2xl border border-nexo-sand/30 hover:border-nexo-sand/60 transition-colors gap-4 group">
+                  
+                  {/* Info del cuadernillo */}
+                  <div className="flex items-center gap-4 w-full md:w-auto text-left">
+                    <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center flex-shrink-0 text-nexo-blue border border-nexo-sand/20 group-hover:scale-105 transition-transform">
+                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-nexo-dark">{item.titulo}</h3>
+                      <p className="text-xs font-medium text-nexo-dark/50 mt-0.5">Adquirido el {item.fechaCompra}</p>
+                    </div>
+                  </div>
+
+                  {/* Botón de descarga real */}
+                  <a 
+                    href={item.urlDescarga} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full md:w-auto px-5 py-2.5 bg-nexo-dark text-white text-sm font-semibold rounded-xl hover:bg-nexo-blue transition-all flex items-center justify-center gap-2 shadow-sm hover:-translate-y-0.5"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Descargar PDF
+                  </a>
+                </div>
+              ))}
             </div>
           )}
         </div>

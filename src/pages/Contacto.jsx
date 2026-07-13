@@ -103,7 +103,10 @@ export const Contacto = () => {
       <div className="max-w-6xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 w-full animate-fade-in-up">
         
         {/* Lado Izquierdo: Textos */}
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-start">
+          <h2 className="text-sm font-bold text-nexo-blue uppercase tracking-widest mb-4">
+            Contactanos
+          </h2>
           <h1 className="text-4xl md:text-5xl font-medium text-nexo-dark mb-8 leading-tight">
             Demos el primer paso juntos.
           </h1>

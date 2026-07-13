@@ -6,21 +6,12 @@ export const Trabajemos = () => {
     <div className="min-h-screen bg-white">
       
       {/* 1. HERO Y TEXTO INTRODUCTORIO */}
-      <section className="w-full relative pt-32">
-        
-        {/* Arco Superior (Imagen) - Le subimos un poco la intensidad al fondo arena para que mezcle bien */}
-        {/* <div className="w-full h-[50vh] min-h-[400px] max-h-[600px] bg-nexo-sand/60 rounded-b-[4rem] md:rounded-b-[8rem] overflow-hidden relative shadow-inner mb-16 md:mb-24">
-          
-          <img 
-            src={heroTrabajemos} 
-            alt="Colegas trabajando en red" 
-            className="w-full h-full object-cover object-bottom opacity-[0.85]" 
-          />
-          
-        </div> */}
+      <section className="w-full relative pt-36">
 
-        {/* Textos */}
-        <div className="max-w-4xl mx-auto px-6 md:px-12 text-center md:text-left animate-fade-in-up">
+        <div className="max-w-6xl mx-auto px-6 md:px-12 text-left animate-fade-in-up">
+          <h2 className="text-sm font-bold text-nexo-rose uppercase tracking-widest mb-4">
+            Trabajá con nosotras
+          </h2>
           <h1 className="text-4xl md:text-5xl font-semibold text-nexo-dark mb-6 leading-tight">
             Expandí tu red,<br className="hidden md:block" /> potenciá tu práctica.
           </h1>

@@ -81,7 +81,7 @@ export const Team = () => {
       <div className="w-full max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center lg:items-start px-6 md:px-12 gap-12 lg:gap-16">
         
         {/* COLUMNA 1: TEXTOS */}
-        <div className="w-full lg:w-5/12 flex-shrink-0 text-center lg:text-left animate-fade-in-up mt-0 lg:mt-12">
+        <div className="w-full lg:w-5/12 flex-shrink-0 text-left md:text-center lg:text-left animate-fade-in-up mt-0 lg:mt-12">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-6 leading-tight">
             Tres miradas,<br className="hidden lg:block" /> un mismo compromiso
           </h2>

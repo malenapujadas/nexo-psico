@@ -28,7 +28,7 @@ export const Services = () => {
       <div className="max-w-6xl mx-auto flex flex-col">
         
         {/* Encabezado de la sección (Orden 1 siempre) */}
-        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-16 order-1">
+        <div className="text-left md:text-center max-w-2xl mx-auto mb-10 md:mb-16 order-1">
           <h2 className="text-3xl md:text-4xl font-semibold text-nexo-dark mb-4">
             ¿Cómo podemos acompañarte hoy?
           </h2>
