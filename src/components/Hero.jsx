@@ -33,7 +33,7 @@ export const Hero = () => {
           hover:bg-nexo-dark transition-all duration-300 transform hover:-translate-y-1
           animate-fade-in-up animation-delay-400
           shadow-[0_10px_20px_-5px_rgba(126,149,163,0.4)] hover:shadow-[0_15px_25px_-5px_rgba(126,149,163,0.5)]"
-          href="https://wa.me/1156158104" >
+          href="https://wa.me/5491156158104" >
           Contactanos
         </a>
       </div>

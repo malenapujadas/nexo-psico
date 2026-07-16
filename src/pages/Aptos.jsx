@@ -118,7 +118,7 @@ export const Aptos = () => {
             
             <a 
               className="bg-nexo-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-nexo-dark transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1"
-              href="https://wa.me/1156158104" >
+              href="https://wa.me/5491156158104" >
               Solicitar turno
             </a>
           </div>
