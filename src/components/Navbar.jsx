@@ -34,7 +34,7 @@ export const Navbar = () => {
       {/* 1. IZQUIERDA: Logo */}
       <div className="flex w-1/4 justify-start items-center">
         <Link to="/">
-          <img src={logo} alt="Nexo Logo" className="h-8 md:h-10 w-auto" />
+          <img src={logo} alt="Nexo Logo" className="h-12 md:h-16 w-auto" />
         </Link>
       </div>
 
