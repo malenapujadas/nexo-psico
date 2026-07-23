@@ -1,30 +1,62 @@
 import React, { useState, useEffect } from 'react';
+// IMPORTANTE: Ajustá esta ruta para que apunte a tu archivo de configuración de Supabase
+import { supabase } from '../supabase';
 
 export const Cuadernillos = () => {
   // 1. Creamos la "memoria" del componente
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  
+  // NUEVO: Estado para saber qué cuadernillo se está comprando y mostrar un "Cargando..." en el botón
+  const [comprandoId, setComprandoId] = useState(null);
 
   // 2. El "cadete" que va a buscar los datos al Backend cuando carga la página
   useEffect(() => {
     const obtenerProductos = async () => {
       try {
-        // Hacemos el pedido a nuestro propio servidor Node.js
         const respuesta = await fetch('https://nexo-psico-backend.onrender.com/api/productos');
         const datos = await respuesta.json();
-        
-        // Guardamos los datos reales que vinieron de Supabase
         setProductos(datos);
       } catch (error) {
         console.error("Hubo un error al traer los productos:", error);
       } finally {
-        // Ya terminamos de buscar, dejamos de mostrar el estado de "cargando"
         setCargando(false);
       }
     };
 
     obtenerProductos();
-  }, []); // Los corchetes vacíos significan: "Hacé esto solo una vez al inicio"
+  }, []);
+
+  // NUEVO: La función que se comunica con nuestra "Cajera Invisible" de Supabase
+  const manejarCompra = async (producto) => {
+    try {
+      // Bloqueamos el botón temporalmente
+      setComprandoId(producto.id);
+
+      // Llamamos a la Edge Function
+      const { data, error } = await supabase.functions.invoke('crear-pago', {
+        body: { 
+          titulo: producto.title,
+          precio: Number(producto.price) 
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Si Mercado Pago nos devuelve el link, llevamos a la usuaria a pagar
+      if (data && data.init_point) {
+        window.location.href = data.init_point;
+      }
+
+    } catch (error) {
+      console.error('Error al conectar con Mercado Pago:', error);
+      alert('Hubo un problema al generar el pago. Intentá de nuevo más tarde.');
+      // Si falla, liberamos el botón
+      setComprandoId(null);
+    }
+  };
 
   // Pantalla de carga mientras esperamos al servidor
   if (cargando) {
@@ -52,7 +84,7 @@ export const Cuadernillos = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-          {/* 3. Ahora recorremos los productos reales que trajimos de la base de datos */}
+          {/* 3. Ahora recorremos los productos reales */}
           {productos.map((producto) => (
             <div 
               key={producto.id}
@@ -69,7 +101,7 @@ export const Cuadernillos = () => {
                   <span className="text-nexo-dark/40 italic text-sm">Espacio para imagen</span>
                 )}
                 <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-nexo-blue tracking-wide uppercase shadow-sm">
-                  {producto.tipo}
+                  {producto.tipo || 'PDF'}
                 </div>
               </div>
 
@@ -93,10 +125,26 @@ export const Cuadernillos = () => {
                     </span>
                   </div>
                   
-                  {/* Botón preparado para Mercado Pago más adelante */}
-                  <button className="w-full bg-nexo-dark text-white py-4 rounded-xl font-semibold text-lg hover:bg-nexo-blue transition-all duration-300 shadow-md flex items-center justify-center gap-2 transform group-hover:-translate-y-1">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    Adquirir cuadernillo
+                  {/* NUEVO: Botón conectado a la función manejarCompra */}
+                  <button 
+                    onClick={() => manejarCompra(producto)}
+                    disabled={comprandoId === producto.id}
+                    className="w-full bg-nexo-dark text-white py-4 rounded-xl font-semibold text-lg hover:bg-nexo-blue transition-all duration-300 shadow-md flex items-center justify-center gap-2 transform group-hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {comprandoId === producto.id ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Conectando...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        Adquirir cuadernillo
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
