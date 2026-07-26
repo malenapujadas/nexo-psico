@@ -17,6 +17,7 @@ import { Servicios } from './pages/Servicios';
 import { Auth } from './pages/Auth';
 import { AuthProvider } from './components/AuthContext';
 import { Perfil } from './pages/Perfil';
+import { ActualizarPassword } from './pages/ActualizarPassword';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
               <Route path="/programa" element={<Programa />} />
               <Route path="/iniciar-sesion" element={<Auth />} />
               <Route path="/perfil" element={<Perfil />} />
+              <Route path="/actualizar-password" element={<ActualizarPassword />} />
               <Route path="/contacto" element={<Contacto />} />
             </Routes>
           </main>

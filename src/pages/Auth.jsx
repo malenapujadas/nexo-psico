@@ -9,29 +9,26 @@ export const Auth = () => {
   const [password, setPassword] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false); 
   
-  // 🛡️ Estados de feedback general y específicos por campo
   const [error, setError] = useState('');
   const [errorEmail, setErrorEmail] = useState('');
   const [errorPassword, setErrorPassword] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  const passwordSegura = /^(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+  // Expresión regular actualizada para permitir caracteres especiales
+  const passwordSegura = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Limpiamos todos los errores previos
     setError(''); 
     setErrorEmail('');
     setErrorPassword('');
     setMensajeExito('');
 
-    // 2. Limpieza de datos (sanitización)
     const emailLimpio = email.trim().toLowerCase();
     const passwordLimpia = password.trim();
 
-    // 3. 🛡️ CIBERSEGURIDAD: Validación estricta antes de contactar a la base de datos
     let hayErrores = false;
 
     if (!emailLimpio) {
@@ -44,29 +41,41 @@ export const Auth = () => {
       hayErrores = true;
     }
 
-    // Si detectamos puros espacios vacíos, cortamos la ejecución acá mismo
     if (hayErrores) return;
 
     setCargando(true); 
 
     try {
       if (vista === 'recuperar') {
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailLimpio);
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailLimpio, {
+          //le decimos a q ruta ir
+          redirectTo: `${window.location.origin}/#/actualizar-password`
+        });
         if (resetError) throw resetError;
         setMensajeExito('Si el correo está registrado, te enviamos un enlace seguro. Revisá tu carpeta de Spam.');
-      } 
+      }
       else if (vista === 'registro') {
         if (!passwordSegura.test(password)) {
-          // Acá usamos el error general porque es de formato, no de campo vacío
           setError('La contraseña no cumple con los requisitos de seguridad.');
           setCargando(false);
           return;
         }
-        const { error: signUpError } = await supabase.auth.signUp({
+        
+        // 1. Guardamos la 'data' además del 'error'
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: emailLimpio,
           password: password,
         });
+        
         if (signUpError) throw signUpError;
+
+        // 2. NUEVA VALIDACIÓN GLOBAL: Revisamos si el correo ya existía en la base
+        if (data?.user?.identities?.length === 0) {
+          setError('Este correo ya se encuentra registrado. Por favor, iniciá sesión o recuperá tu contraseña.');
+          setCargando(false);
+          return;
+        }
+
         setMensajeExito('¡Cuenta creada con éxito! Por favor, revisá tu correo para validar tu identidad.');
       } 
       else {
@@ -113,10 +122,7 @@ export const Auth = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow-sm border border-nexo-sand/30 rounded-2xl sm:px-10">
           
-          {/* Le agregamos noValidate al form para desactivar los carteles genéricos del navegador y usar los nuestros */}
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
-            
-            {/* Campo Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-nexo-dark">
                 Correo electrónico
@@ -128,10 +134,9 @@ export const Auth = () => {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    if (errorEmail) setErrorEmail(''); // Limpia el error al empezar a escribir
+                    if (errorEmail) setErrorEmail('');
                   }}
                   disabled={cargando}
-                  // Si hay error, el borde se pone rojo automáticamente
                   className={`block w-full rounded-xl border-0 py-3 px-4 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 disabled:opacity-50 transition-colors
                     ${errorEmail 
                       ? 'ring-red-500 focus:ring-red-500 text-red-900 bg-red-50/30' 
@@ -139,7 +144,6 @@ export const Auth = () => {
                   placeholder="hola@ejemplo.com"
                 />
               </div>
-              {/* Mensaje de error específico debajo del input */}
               {errorEmail && (
                 <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -148,7 +152,6 @@ export const Auth = () => {
               )}
             </div>
 
-            {/* Campo Contraseña con Ojito */}
             {vista !== 'recuperar' && (
               <div>
                 <div className="flex items-center justify-between">
@@ -169,7 +172,7 @@ export const Auth = () => {
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if (errorPassword) setErrorPassword(''); // Limpia el error al empezar a escribir
+                      if (errorPassword) setErrorPassword(''); 
                     }}
                     disabled={cargando}
                     className={`block w-full rounded-xl border-0 py-3 pl-4 pr-12 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 disabled:opacity-50 transition-colors
@@ -192,7 +195,6 @@ export const Auth = () => {
                   </button>
                 </div>
 
-                {/* Mensaje de error específico debajo del input */}
                 {errorPassword && (
                   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                     <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -200,7 +202,6 @@ export const Auth = () => {
                   </p>
                 )}
 
-                {/* Reglas de contraseña visibles solo en Registro */}
                 {vista === 'registro' && !errorPassword && (
                   <p className="mt-2 text-xs text-nexo-dark/60 font-medium">
                     La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula y un número.
@@ -209,7 +210,6 @@ export const Auth = () => {
               </div>
             )}
 
-            {/* Mensajes de Error General y Éxito */}
             {error && (
               <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-start gap-2 border border-red-100">
                 <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -223,7 +223,6 @@ export const Auth = () => {
               </div>
             )}
 
-            {/* Botón Principal */}
             <div>
               <button
                 type="submit"
@@ -238,7 +237,6 @@ export const Auth = () => {
             </div>
           </form>
 
-          {/* Enlaces inferiores */}
           <div className="mt-6 flex flex-col items-center gap-2">
             {vista === 'recuperar' ? (
               <button onClick={() => cambiarVista('login')} className="text-sm font-medium text-nexo-blue hover:text-nexo-dark underline decoration-nexo-blue/30 underline-offset-4">

@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 // IMPORTANTE: Ajustá esta ruta para que apunte a tu archivo de configuración de Supabase
 import { supabase } from '../supabase';
+import { useNavigate } from 'react-router-dom';
 
 export const Cuadernillos = () => {
+  const navigate = useNavigate();
   // 1. Creamos la "memoria" del componente
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
+
+  
   
   // NUEVO: Estado para saber qué cuadernillo se está comprando y mostrar un "Cargando..." en el botón
   const [comprandoId, setComprandoId] = useState(null);
+
+  // estado para el pop up de login
+  const [mostrarErrorLogin, setMostrarErrorLogin] = useState(false);
 
   // 2. El "cadete" que va a buscar los datos al Backend cuando carga la página
   useEffect(() => {
@@ -30,14 +37,31 @@ export const Cuadernillos = () => {
   // NUEVO: La función que se comunica con nuestra "Cajera Invisible" de Supabase
   const manejarCompra = async (producto) => {
     try {
-      // Bloqueamos el botón temporalmente
+      // 1. VERIFICACIÓN DE SEGURIDAD
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        // En vez del alert, activamos nuestro pop-up visual
+        setMostrarErrorLogin(true);
+        
+        // Hacemos que el cartelito desaparezca solo después de 5 segundos
+        setTimeout(() => {
+          setMostrarErrorLogin(false);
+          navigate('/iniciar-sesion');
+        }, 7000);
+        
+        return; 
+      }
+
+      // Si hay sesión, seguimos con la compra normal
       setComprandoId(producto.id);
 
-      // Llamamos a la Edge Function
       const { data, error } = await supabase.functions.invoke('crear-pago', {
         body: { 
           titulo: producto.title,
-          precio: Number(producto.price) 
+          precio: Number(producto.price),
+          usuario_id: session.user.id,
+          producto_id: producto.id
         }
       });
 
@@ -45,15 +69,14 @@ export const Cuadernillos = () => {
         throw error;
       }
 
-      // Si Mercado Pago nos devuelve el link, llevamos a la usuaria a pagar
       if (data && data.init_point) {
         window.location.href = data.init_point;
       }
 
     } catch (error) {
       console.error('Error al conectar con Mercado Pago:', error);
+      // Acá podrías poner otro diseño de error si quisieras, por ahora dejo el alert genérico para fallos graves del servidor
       alert('Hubo un problema al generar el pago. Intentá de nuevo más tarde.');
-      // Si falla, liberamos el botón
       setComprandoId(null);
     }
   };
@@ -153,6 +176,40 @@ export const Cuadernillos = () => {
         </div>
 
       </div>
+
+      {/* Pop-up de Error visual (Toast) */}
+      {mostrarErrorLogin && (
+        <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md transition-all duration-300">
+          <div className="bg-red-50 border border-red-300 shadow-2xl rounded-2xl p-4 md:p-5 flex items-start gap-4">
+            <div className="bg-red-100 p-2 rounded-full flex-shrink-0 mt-0.5">
+              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="flex-grow">
+              <h4 className="text-red-800 font-bold text-sm md:text-base mb-1">Iniciá sesión primero</h4>
+              <p className="text-red-600/90 text-xs md:text-sm leading-relaxed mb-2">
+                Para poder comprar y que el material quede guardado en tu cuenta, es necesario que te registres o inicies sesión.
+              </p>
+              <p className="text-red-800 font-semibold text-xs animate-pulse">
+                ⏳ Redirigiendo a inicio de sesión en unos segundos...
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                setMostrarErrorLogin(false);
+                navigate('/iniciar-sesion');
+              }}
+              title="Ir ahora"
+              className="text-red-400 hover:text-red-600 transition-colors p-1"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
