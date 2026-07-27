@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,6 +11,34 @@ export const ActualizarPassword = () => {
   
   const passwordSegura = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
+  useEffect(() => {
+    // Rescatamos el token manualmente si se formó un doble hash
+    const atraparToken = async () => {
+      const hash = window.location.hash;
+      if (hash.includes('access_token=')) {
+        // Recortamos la URL para quedarnos solo con los datos secretos
+        const tokenString = hash.substring(hash.indexOf('access_token='));
+        const params = new URLSearchParams(tokenString);
+        
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        
+        if (access_token && refresh_token) {
+          // Le forzamos la sesión a Supabase para que no tire error
+          await supabase.auth.setSession({
+            access_token: access_token,
+            refresh_token: refresh_token
+          });
+          
+          // Limpiamos la URL de arriba para que quede prolija y segura
+          navigate('/actualizar-password', { replace: true });
+        }
+      }
+    };
+
+    atraparToken();
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -22,7 +50,6 @@ export const ActualizarPassword = () => {
 
     setCargando(true);
     try {
-      // Supabase ya sabe quién sos gracias al radar que pusimos en el Home
       const { error: updateError } = await supabase.auth.updateUser({
         password: password
       });
