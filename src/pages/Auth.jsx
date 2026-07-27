@@ -48,8 +48,8 @@ export const Auth = () => {
     try {
       if (vista === 'recuperar') {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailLimpio, {
-          //le decimos a q ruta ir
-          redirectTo: `${window.location.origin}/#/actualizar-password`
+          // lo mando a la pagina ppal 
+          redirectTo: `${window.location.origin}/`
         });
         if (resetError) throw resetError;
         setMensajeExito('Si el correo está registrado, te enviamos un enlace seguro. Revisá tu carpeta de Spam.');

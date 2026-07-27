@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,18 +11,6 @@ export const ActualizarPassword = () => {
   
   const passwordSegura = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  // Verificamos si realmente viene de un link de recuperación
-  useEffect(() => {
-    const verificarSesion = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        // Si intenta entrar acá sin venir del mail, lo mandamos al login
-        navigate('/iniciar-sesion');
-      }
-    };
-    verificarSesion();
-  }, [navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -34,19 +22,18 @@ export const ActualizarPassword = () => {
 
     setCargando(true);
     try {
-      // Le decimos a Supabase que guarde la nueva clave
+      // Supabase ya sabe quién sos gracias al radar que pusimos en el Home
       const { error: updateError } = await supabase.auth.updateUser({
         password: password
       });
 
       if (updateError) throw updateError;
 
-      // Si todo sale bien, lo llevamos directo a su perfil
       alert("¡Contraseña actualizada con éxito!");
       navigate('/perfil');
 
     } catch (err) {
-      setError(err.message || 'Hubo un error al actualizar la contraseña.');
+      setError(err.message || 'Hubo un error al actualizar la contraseña. Intentá pedir otro link.');
     } finally {
       setCargando(false);
     }
