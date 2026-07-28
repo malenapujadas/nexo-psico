@@ -7,15 +7,32 @@ export const ActualizarPassword = () => {
   const [password, setPassword] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
   
-  // 🛡️ Estados de feedback
+  // estados de feedback
   const [error, setError] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
   const [cargando, setCargando] = useState(false);
   
   const passwordSegura = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
+  // funcion para traducir los errores de la bd
+  const traducirError = (mensajeIngles) => {
+    if (mensajeIngles.includes('New password should be different')) {
+      return 'La nueva contraseña tiene que ser distinta a la que ya venías usando.';
+    }
+    if (mensajeIngles.includes('Auth session missing')) {
+      return 'La sesión expiró o el link ya se usó. Por favor, volvé a pedir un enlace de recuperación.';
+    }
+    if (mensajeIngles.includes('Token has expired or is invalid')) {
+      return 'El link que usaste ya expiró o es inválido. Pedí uno nuevo.';
+    }
+    if (mensajeIngles.includes('User not found')) {
+      return 'No encontramos ninguna cuenta vinculada a esta solicitud.';
+    }
+    // mensaje de error x default
+    return 'Ocurrió un error al actualizar la contraseña. Por favor, intentá de nuevo.';
+  };
+
   useEffect(() => {
-    // 🛡️ ANTI-CHOQUE DE TRENES: Rescatamos el token manualmente
     const atraparToken = async () => {
       const hash = window.location.hash;
       if (hash.includes('access_token=')) {
@@ -43,7 +60,6 @@ export const ActualizarPassword = () => {
     setError('');
     setMensajeExito('');
 
-    // 1. Validación estricta
     if (!passwordSegura.test(password)) {
       setError('La contraseña no cumple con los requisitos de seguridad.');
       return;
@@ -57,16 +73,15 @@ export const ActualizarPassword = () => {
 
       if (updateError) throw updateError;
 
-      // 2. Cartel de Éxito en Pantalla (sin alert)
       setMensajeExito('¡Contraseña actualizada con éxito! Redirigiendo a tu perfil...');
       
-      // 3. Esperamos 2.5 segundos para que la usuaria lo lea y la llevamos al perfil
       setTimeout(() => {
         navigate('/perfil');
       }, 2500);
 
     } catch (err) {
-      setError(err.message || 'Hubo un error al actualizar la contraseña. Intentá pedir otro link.');
+      // traductor
+      setError(traducirError(err.message));
     } finally {
       setCargando(false);
     }
@@ -108,7 +123,6 @@ export const ActualizarPassword = () => {
                   placeholder="••••••••"
                 />
                 
-                {/* 👁️ Ojitos en lugar de texto */}
                 <button
                   type="button"
                   onClick={() => setMostrarPassword(!mostrarPassword)}
@@ -122,7 +136,6 @@ export const ActualizarPassword = () => {
                 </button>
               </div>
 
-              {/* 📋 Reglas siempre visibles si no hay error */}
               {!error && !mensajeExito && (
                 <p className="mt-2 text-xs text-nexo-dark/60 font-medium">
                   La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula y un número.
@@ -130,7 +143,6 @@ export const ActualizarPassword = () => {
               )}
             </div>
 
-            {/* 🛑 Mensaje de Error */}
             {error && (
               <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-start gap-2 border border-red-100">
                 <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -138,7 +150,6 @@ export const ActualizarPassword = () => {
               </div>
             )}
 
-            {/* ✅ Mensaje de Éxito Integrado */}
             {mensajeExito && (
               <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg flex items-center gap-2 border border-green-100 animate-fade-in-up">
                 <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
