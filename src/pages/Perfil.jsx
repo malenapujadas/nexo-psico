@@ -7,61 +7,86 @@ export const Perfil = () => {
   const { usuario, cerrarSesion } = useAuth();
   const navigate = useNavigate();
 
-  // Estados para el cambio de contraseña interno
   const [mostrarFormClave, setMostrarFormClave] = useState(false);
   const [nuevaPassword, setNuevaPassword] = useState('');
   const [cargandoClave, setCargandoClave] = useState(false);
   const [feedbackClave, setFeedbackClave] = useState({ tipo: '', mensaje: '' });
   const [mostrarOjito, setMostrarOjito] = useState(false);
+  
+  // estados para los cuadernillos
+  const [misCuadernillos, setMisCuadernillos] = useState([]);
+  const [cargandoCompras, setCargandoCompras] = useState(true);
 
-  // Regex de Seguridad (la misma que en Auth)
   const passwordSegura = /^(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
-  // 🛡️ CIBERSEGURIDAD: Expulsar si no hay usuario
   useEffect(() => {
     if (!usuario) {
       navigate('/iniciar-sesion');
     }
   }, [usuario, navigate]);
 
-  if (!usuario) return null; 
+  // busco las compras reales
+  useEffect(() => {
+    const obtenerMisCompras = async () => {
+      if (!usuario) return;
+      try {
+        // join -- traigo la info de 'compras' y le sumamos la info de 'productos'
+        const { data, error } = await supabase
+          .from('compras')
+          .select(`
+            id,
+            created_at,
+            producto_id,
+            productos (
+              title,
+              pdf_url
+            )
+          `)
+          .eq('cliente_id', usuario.id)
+          .eq('estado_pago', 'completado');
+
+        if (error) throw error;
+
+        // Formateamos los datos para la interfaz
+        const comprasFormateadas = data.map(compra => ({
+          id: compra.id,
+          // OJO: Chequeá que 'title' y 'pdf_url' coincidan con los nombres de tus columnas en Supabase
+          titulo: compra.productos?.title || 'Material Descargable',
+          fechaCompra: new Date(compra.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
+          urlDescarga: compra.productos?.pdf_url || '#' 
+        }));
+
+        setMisCuadernillos(comprasFormateadas);
+      } catch (err) {
+        console.error('Error al traer compras:', err.message);
+      } finally {
+        setCargandoCompras(false);
+      }
+    };
+
+    obtenerMisCompras();
+  }, [usuario]);
 
   const handleActualizarClave = async (e) => {
     e.preventDefault();
     setFeedbackClave({ tipo: '', mensaje: '' });
-
     const passwordLimpia = nuevaPassword.trim();
 
     if (!passwordSegura.test(passwordLimpia)) {
-      setFeedbackClave({ 
-        tipo: 'error', 
-        mensaje: 'Debe tener al menos 8 caracteres, una mayúscula y un número.' 
-      });
+      setFeedbackClave({ tipo: 'error', mensaje: 'Debe tener al menos 8 caracteres, una mayúscula y un número.' });
       return;
     }
-
     setCargandoClave(true);
-
     try {
-      // Actualizamos directamente desde adentro
-      const { error } = await supabase.auth.updateUser({
-        password: passwordLimpia
-      });
-
+      const { error } = await supabase.auth.updateUser({ password: passwordLimpia });
       if (error) throw error;
 
-      setFeedbackClave({ 
-        tipo: 'exito', 
-        mensaje: '¡Tu contraseña se actualizó correctamente!' 
-      });
+      setFeedbackClave({ tipo: 'exito', mensaje: '¡Tu contraseña se actualizó correctamente!' });
       setNuevaPassword('');
-      
-      // Ocultamos el formulario después de 3 segundos
       setTimeout(() => {
         setMostrarFormClave(false);
         setFeedbackClave({ tipo: '', mensaje: '' });
       }, 3000);
-
     } catch (err) {
       setFeedbackClave({ tipo: 'error', mensaje: err.message });
     } finally {
@@ -69,16 +94,7 @@ export const Perfil = () => {
     }
   };
 
-  // Datos simulados de compras
-  const misCuadernillos = [
-    {
-      id: '1',
-      titulo: 'Cuadernillo de herramientas para la ansiedad',
-      fechaCompra: '12 de Julio de 2026',
-      // Usamos un PDF de prueba público de internet para simular la descarga
-      urlDescarga: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' 
-    }
-  ];
+  if (!usuario) return null; 
 
   return (
     <div className="min-h-screen bg-nexo-bg pt-32 pb-24">
@@ -99,7 +115,6 @@ export const Perfil = () => {
               </p>
             </div>
             
-            {/* Botones de Gestión (Alineados arriba a la derecha) */}
             <div className="flex flex-wrap md:items-center gap-3">
               <button 
                 onClick={() => setMostrarFormClave(!mostrarFormClave)}
@@ -116,7 +131,6 @@ export const Perfil = () => {
             </div>
           </div>
 
-          {/* Formulario Desplegable para cambiar clave */}
           {mostrarFormClave && (
             <div className="mt-8 pt-6 border-t border-nexo-sand/30 animate-fade-in-up">
               <h3 className="text-sm font-bold text-nexo-dark mb-4">Ingresá tu nueva contraseña</h3>
@@ -132,9 +146,7 @@ export const Perfil = () => {
                     disabled={cargandoClave}
                     placeholder="••••••••"
                     className={`block w-full rounded-xl border-0 py-2.5 pl-4 pr-12 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 transition-colors
-                      ${feedbackClave.tipo === 'error' 
-                        ? 'ring-red-500 focus:ring-red-500 text-red-900 bg-red-50/30' 
-                        : 'text-nexo-dark ring-nexo-sand/50 focus:ring-nexo-blue'}`}
+                      ${feedbackClave.tipo === 'error' ? 'ring-red-500 focus:ring-red-500 text-red-900 bg-red-50/30' : 'text-nexo-dark ring-nexo-sand/50 focus:ring-nexo-blue'}`}
                   />
                   <button
                     type="button"
@@ -149,7 +161,6 @@ export const Perfil = () => {
                   </button>
                 </div>
 
-                {/* Feedback */}
                 {feedbackClave.mensaje && (
                   <p className={`text-sm mb-3 flex items-center gap-1 ${feedbackClave.tipo === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                     {feedbackClave.tipo === 'error' ? '⚠️' : '✅'} {feedbackClave.mensaje}
@@ -175,7 +186,11 @@ export const Perfil = () => {
             Mis Cuadernillos Descargables
           </h2>
 
-          {misCuadernillos.length === 0 ? (
+          {cargandoCompras ? (
+            <div className="text-center py-12">
+              <p className="text-nexo-dark/60 font-medium animate-pulse">Buscando tus materiales...</p>
+            </div>
+          ) : misCuadernillos.length === 0 ? (
             <div className="text-center py-12 border-2 border-dashed border-nexo-sand/40 rounded-2xl">
               <svg className="w-12 h-12 text-nexo-dark/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
               <p className="text-nexo-dark/60 font-medium mb-2">Todavía no adquiriste ningún material</p>
@@ -186,7 +201,6 @@ export const Perfil = () => {
               {misCuadernillos.map((item) => (
                 <div key={item.id} className="flex flex-col md:flex-row items-center justify-between p-5 bg-nexo-bg/40 rounded-2xl border border-nexo-sand/30 hover:border-nexo-sand/60 transition-colors gap-4 group">
                   
-                  {/* Info del cuadernillo */}
                   <div className="flex items-center gap-4 w-full md:w-auto text-left">
                     <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center flex-shrink-0 text-nexo-blue border border-nexo-sand/20 group-hover:scale-105 transition-transform">
                       <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
@@ -197,7 +211,6 @@ export const Perfil = () => {
                     </div>
                   </div>
 
-                  {/* Botón de descarga real */}
                   <a 
                     href={item.urlDescarga} 
                     target="_blank" 

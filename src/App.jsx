@@ -18,6 +18,7 @@ import { Auth } from './pages/Auth';
 import { AuthProvider } from './components/AuthContext';
 import { Perfil } from './pages/Perfil';
 import { ActualizarPassword } from './pages/ActualizarPassword';
+import { AdminPanel } from './pages/AdminPanel';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
               <Route path="/iniciar-sesion" element={<Auth />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/actualizar-password" element={<ActualizarPassword />} />
+              <Route path="/admin" element={<AdminPanel />} />
               <Route path="/contacto" element={<Contacto />} />
             </Routes>
           </main>

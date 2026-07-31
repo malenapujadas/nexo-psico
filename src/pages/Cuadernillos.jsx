@@ -1,59 +1,64 @@
 import React, { useState, useEffect } from 'react';
-// IMPORTANTE: Ajustá esta ruta para que apunte a tu archivo de configuración de Supabase
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 
 export const Cuadernillos = () => {
   const navigate = useNavigate();
-  // 1. Creamos la "memoria" del componente
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
-
-  
-  
-  // NUEVO: Estado para saber qué cuadernillo se está comprando y mostrar un "Cargando..." en el botón
   const [comprandoId, setComprandoId] = useState(null);
-
-  // estado para el pop up de login
   const [mostrarErrorLogin, setMostrarErrorLogin] = useState(false);
+  
+  //memoria para guardar los cuadernillos que ya se compraron
+  const [cuadernillosComprados, setCuadernillosComprados] = useState([]);
 
-  // 2. El "cadete" que va a buscar los datos al Backend cuando carga la página
   useEffect(() => {
-    const obtenerProductos = async () => {
+    const cargarDatos = async () => {
       try {
+        // traigo productos del back
         const respuesta = await fetch('https://nexo-psico-backend.onrender.com/api/productos');
         const datos = await respuesta.json();
-        setProductos(datos);
+        setProductos(datos.filter(producto => producto.activo !== false));
+
+        // reviso si hay alguien logueado para chequear sus compras
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const { data: compras } = await supabase
+            .from('compras')
+            .select('producto_id')
+            .eq('cliente_id', session.user.id)
+            .eq('estado_pago', 'completado');
+
+          if (compras) {
+            // guardo solo los id
+            const idsComprados = compras.map(compra => compra.producto_id);
+            setCuadernillosComprados(idsComprados);
+          }
+        }
       } catch (error) {
-        console.error("Hubo un error al traer los productos:", error);
+        console.error("Hubo un error al cargar los datos:", error);
       } finally {
         setCargando(false);
       }
     };
 
-    obtenerProductos();
+    cargarDatos();
   }, []);
 
-  // NUEVO: La función que se comunica con nuestra "Cajera Invisible" de Supabase
   const manejarCompra = async (producto) => {
     try {
-      // 1. VERIFICACIÓN DE SEGURIDAD
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        // En vez del alert, activamos nuestro pop-up visual
         setMostrarErrorLogin(true);
-        
-        // Hacemos que el cartelito desaparezca solo después de 5 segundos
         setTimeout(() => {
           setMostrarErrorLogin(false);
           navigate('/iniciar-sesion');
         }, 7000);
-        
         return; 
       }
 
-      // Si hay sesión, seguimos con la compra normal
       setComprandoId(producto.id);
 
       const { data, error } = await supabase.functions.invoke('crear-pago', {
@@ -65,23 +70,16 @@ export const Cuadernillos = () => {
         }
       });
 
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.init_point) {
-        window.location.href = data.init_point;
-      }
+      if (error) throw error;
+      if (data && data.init_point) window.location.href = data.init_point;
 
     } catch (error) {
       console.error('Error al conectar con Mercado Pago:', error);
-      // Acá podrías poner otro diseño de error si quisieras, por ahora dejo el alert genérico para fallos graves del servidor
       alert('Hubo un problema al generar el pago. Intentá de nuevo más tarde.');
       setComprandoId(null);
     }
   };
 
-  // Pantalla de carga mientras esperamos al servidor
   if (cargando) {
     return (
       <div className="min-h-screen bg-white pt-32 pb-24 flex justify-center items-center">
@@ -107,77 +105,88 @@ export const Cuadernillos = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
-          {/* 3. Ahora recorremos los productos reales */}
-          {productos.map((producto) => (
-            <div 
-              key={producto.id}
-              className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-nexo-sand/30 flex flex-col group animate-fade-in-up"
-            >
-              <div className="w-full aspect-[4/3] bg-nexo-sand/20 relative overflow-hidden flex items-center justify-center">
-                {producto.image_url ? (
-                  <img 
-                    src={producto.image_url} 
-                    alt={`Portada de ${producto.title}`} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                ) : (
-                  <span className="text-nexo-dark/40 italic text-sm">Espacio para imagen</span>
-                )}
-                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-nexo-blue tracking-wide uppercase shadow-sm">
-                  {producto.tipo || 'PDF'}
-                </div>
-              </div>
+          {productos.map((producto) => {
+            // chequeo si el id esta en el listado de compras
+            const yaComprado = cuadernillosComprados.includes(producto.id);
 
-              <div className="p-8 md:p-10 flex flex-col flex-grow">
-                <h3 className="text-2xl md:text-3xl font-bold text-nexo-dark mb-4 leading-tight">
-                  {producto.title}
-                </h3>
-                
-                <p className="text-nexo-dark/70 text-base leading-relaxed mb-8 flex-grow">
-                  {producto.description}
-                </p>
-                
-                <div className="flex flex-col gap-6 mt-auto pt-6 border-t border-nexo-sand/30">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-nexo-dark/60 uppercase tracking-wide flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                      Archivo PDF
-                    </span>
-                    <span className="text-3xl font-bold text-nexo-dark">
-                      ${Number(producto.price).toLocaleString('es-AR')}
-                    </span>
+            return (
+              <div 
+                key={producto.id}
+                className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-nexo-sand/30 flex flex-col group animate-fade-in-up"
+              >
+                <div className="w-full aspect-[4/3] bg-nexo-sand/20 relative overflow-hidden flex items-center justify-center">
+                  {producto.image_url ? (
+                    <img 
+                      src={producto.image_url} 
+                      alt={`Portada de ${producto.title}`} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <span className="text-nexo-dark/40 italic text-sm">Espacio para imagen</span>
+                  )}
+                  <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-nexo-blue tracking-wide uppercase shadow-sm">
+                    {producto.tipo || 'PDF'}
                   </div>
+                </div>
+
+                <div className="p-8 md:p-10 flex flex-col flex-grow">
+                  <h3 className="text-2xl md:text-3xl font-bold text-nexo-dark mb-4 leading-tight">
+                    {producto.title}
+                  </h3>
                   
-                  {/* NUEVO: Botón conectado a la función manejarCompra */}
-                  <button 
-                    onClick={() => manejarCompra(producto)}
-                    disabled={comprandoId === producto.id}
-                    className="w-full bg-nexo-dark text-white py-4 rounded-xl font-semibold text-lg hover:bg-nexo-blue transition-all duration-300 shadow-md flex items-center justify-center gap-2 transform group-hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    {comprandoId === producto.id ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Conectando...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        Adquirir cuadernillo
-                      </>
-                    )}
-                  </button>
+                  <p className="text-nexo-dark/70 text-base leading-relaxed mb-8 flex-grow">
+                    {producto.description}
+                  </p>
+                  
+                  <div className="flex flex-col gap-6 mt-auto pt-6 border-t border-nexo-sand/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-nexo-dark/60 uppercase tracking-wide flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Archivo PDF
+                      </span>
+                      <span className="text-3xl font-bold text-nexo-dark">
+                        ${Number(producto.price).toLocaleString('es-AR')}
+                      </span>
+                    </div>
+                    
+                    {/* Botón Dinámico: Cambia si ya lo compró */}
+                    <button 
+                      onClick={() => yaComprado ? navigate('/perfil') : manejarCompra(producto)}
+                      disabled={comprandoId === producto.id}
+                      className={`w-full text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-md flex items-center justify-center gap-2 transform disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none
+                        ${yaComprado 
+                          ? 'bg-green-600 hover:bg-green-700' 
+                          : 'bg-nexo-dark hover:bg-nexo-blue group-hover:-translate-y-1'}`}
+                    >
+                      {comprandoId === producto.id ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Conectando...
+                        </>
+                      ) : yaComprado ? (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          Material adquirido (Ir a Perfil)
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                          Adquirir cuadernillo
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
       </div>
 
-      {/* Pop-up de Error visual (Toast) */}
+      {/* Pop-up de error visual */}
       {mostrarErrorLogin && (
         <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md transition-all duration-300">
           <div className="bg-red-50 border border-red-300 shadow-2xl rounded-2xl p-4 md:p-5 flex items-start gap-4">
@@ -192,7 +201,7 @@ export const Cuadernillos = () => {
                 Para poder comprar y que el material quede guardado en tu cuenta, es necesario que te registres o inicies sesión.
               </p>
               <p className="text-red-800 font-semibold text-xs animate-pulse">
-                ⏳ Redirigiendo a inicio de sesión en unos segundos...
+                ⏳ Redirigiendo a inicio de sesión...
               </p>
             </div>
             <button 
@@ -200,12 +209,9 @@ export const Cuadernillos = () => {
                 setMostrarErrorLogin(false);
                 navigate('/iniciar-sesion');
               }}
-              title="Ir ahora"
               className="text-red-400 hover:text-red-600 transition-colors p-1"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </button>
           </div>
         </div>
