@@ -71,7 +71,7 @@ export const Cuadernillos = () => {
       });
 
       if (error) throw error;
-      if (data && data.init_point) window.location.href = data.init_point;
+      if (data && data.sandbox_init_point) window.location.href = data.sandbox_init_point;
 
     } catch (error) {
       console.error('Error al conectar con Mercado Pago:', error);

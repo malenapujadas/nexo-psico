@@ -51,7 +51,7 @@ serve(async (req) => {
     const mpData = await mpResponse.json()
 
     return new Response(
-      JSON.stringify({ id: mpData.id, init_point: mpData.init_point }),
+      JSON.stringify({ id: mpData.id, sandbox_init_point: mpData.sandbox_init_point }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
