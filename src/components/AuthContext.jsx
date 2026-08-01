@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       .from('perfiles_clientes')
       .select('rol')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error al verificar rol de usuario:', error.message);

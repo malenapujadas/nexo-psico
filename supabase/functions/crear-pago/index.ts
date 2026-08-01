@@ -50,6 +50,14 @@ serve(async (req) => {
 
     const mpData = await mpResponse.json()
 
+    if (!mpResponse.ok || !mpData.sandbox_init_point) {
+      console.error('Mercado Pago rechazó la preferencia:', mpData)
+      return new Response(
+        JSON.stringify({ error: mpData.message || 'Mercado Pago no devolvió un link de pago.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+
     return new Response(
       JSON.stringify({ id: mpData.id, sandbox_init_point: mpData.sandbox_init_point }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

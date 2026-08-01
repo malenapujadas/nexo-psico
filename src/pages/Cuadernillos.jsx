@@ -71,7 +71,9 @@ export const Cuadernillos = () => {
       });
 
       if (error) throw error;
-      if (data && data.sandbox_init_point) window.location.href = data.sandbox_init_point;
+      if (!data?.sandbox_init_point) throw new Error(data?.error || 'No se recibió el link de pago.');
+
+      window.location.href = data.sandbox_init_point;
 
     } catch (error) {
       console.error('Error al conectar con Mercado Pago:', error);
