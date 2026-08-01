@@ -4,7 +4,7 @@ import logo from '../assets/logo.png';
 import { useAuth } from './AuthContext'; 
 
 export const Navbar = () => {
-  const { usuario } = useAuth(); 
+  const { usuario } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
 
@@ -83,8 +83,8 @@ export const Navbar = () => {
         {/* Botón Desktop con Ícono */}
         <div className="hidden md:block">
           {usuario ? (
-            <Link 
-              to="/perfil" 
+            <Link
+              to="/perfil"
               className="flex items-center gap-2 text-sm font-semibold text-nexo-blue hover:text-nexo-dark transition-colors bg-white/60 border border-nexo-blue/20 px-4 py-2 rounded-full shadow-sm whitespace-nowrap"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -99,6 +99,8 @@ export const Navbar = () => {
               Iniciar Sesión
             </Link>
           )}
+
+        
         </div>
 
         {/* Botón Menú Mobile */}

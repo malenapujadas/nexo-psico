@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { supabase } from '../supabase';
+import { Link } from 'react-router-dom';
 
 export const Perfil = () => {
-  const { usuario, cerrarSesion } = useAuth();
+  const { usuario, esAdmin, cerrarSesion } = useAuth();
   const navigate = useNavigate();
 
   const [mostrarFormClave, setMostrarFormClave] = useState(false);
@@ -116,13 +117,22 @@ export const Perfil = () => {
             </div>
             
             <div className="flex flex-wrap md:items-center gap-3">
-              <button 
+              {esAdmin && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-nexo-dark rounded-xl hover:bg-nexo-rose transition-all shadow-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Panel de Admin
+                </Link>
+              )}
+              <button
                 onClick={() => setMostrarFormClave(!mostrarFormClave)}
                 className="px-4 py-2.5 text-xs font-semibold text-nexo-dark bg-nexo-bg rounded-xl hover:bg-nexo-sand/40 transition-all border border-nexo-sand/30"
               >
                 {mostrarFormClave ? 'Cancelar cambio' : 'Cambiar Contraseña'}
               </button>
-              <button 
+              <button
                 onClick={cerrarSesion}
                 className="px-4 py-2.5 text-xs font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all shadow-sm"
               >

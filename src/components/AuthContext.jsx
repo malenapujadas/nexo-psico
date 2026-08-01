@@ -7,7 +7,26 @@ const AuthContext = createContext({});
 // 2. Creamos el Proveedor (Provider) que va a envolver a toda nuestra app
 export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
+  const [esAdmin, setEsAdmin] = useState(false);
   const [cargandoCtx, setCargandoCtx] = useState(true);
+
+  // Consulta el rol del usuario en la tabla de perfiles (no confiamos en nada guardado en el cliente)
+  const verificarRolAdmin = async (userId) => {
+    if (!userId) {
+      setEsAdmin(false);
+      return;
+    }
+    const { data: perfil, error } = await supabase
+      .from('perfiles_clientes')
+      .select('rol')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error al verificar rol de usuario:', error.message);
+    }
+    setEsAdmin(perfil?.rol === 'admin');
+  };
 
   useEffect(() => {
     // Apenas carga la app, le preguntamos a Supabase si hay una sesión activa guardada
@@ -15,15 +34,17 @@ export const AuthProvider = ({ children }) => {
       const { data: { session } } = await supabase.auth.getSession();
       setUsuario(session?.user ?? null);
       setCargandoCtx(false);
+      verificarRolAdmin(session?.user?.id);
     };
 
     obtenerSesionInicial();
 
-    // 🛡️ CIBERSEGURIDAD: Dejamos un "escucha" activo. 
+    // 🛡️ CIBERSEGURIDAD: Dejamos un "escucha" activo.
     // Si el usuario inicia sesión, cierra sesión o expira su token, esto se ejecuta al instante.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUsuario(session?.user ?? null);
       setCargandoCtx(false);
+      verificarRolAdmin(session?.user?.id);
     });
 
     // Limpieza del escucha cuando el componente se destruye
@@ -36,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, cargandoCtx, cerrarSesion }}>
+    <AuthContext.Provider value={{ usuario, esAdmin, cargandoCtx, cerrarSesion }}>
       {!cargandoCtx && children}
     </AuthContext.Provider>
   );
