@@ -27,9 +27,9 @@ serve(async (req) => {
         },
       ],
       back_urls: {
-        success: "https://nexopsico.vercel.app/perfil", 
-        failure: "https://nexopsico.vercel.app/",
-        pending: "https://nexopsico.vercel.app/"
+        success: "https://nexo-psico.vercel.app/perfil",
+        failure: "https://nexo-psico.vercel.app/",
+        pending: "https://nexo-psico.vercel.app/"
       },
       auto_return: "approved",
       // 2. EL SECRETO PARA EL WEBHOOK: La información invisible de la factura
@@ -50,7 +50,7 @@ serve(async (req) => {
 
     const mpData = await mpResponse.json()
 
-    if (!mpResponse.ok || !mpData.sandbox_init_point) {
+    if (!mpResponse.ok || !mpData.init_point) {
       console.error('Mercado Pago rechazó la preferencia:', mpData)
       return new Response(
         JSON.stringify({ error: mpData.message || 'Mercado Pago no devolvió un link de pago.' }),
@@ -59,7 +59,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ id: mpData.id, sandbox_init_point: mpData.sandbox_init_point }),
+      JSON.stringify({ id: mpData.id, init_point: mpData.init_point }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
