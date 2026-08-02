@@ -27,9 +27,9 @@ serve(async (req) => {
         },
       ],
       back_urls: {
-        success: "https://nexo-psico.vercel.app/perfil",
-        failure: "https://nexo-psico.vercel.app/",
-        pending: "https://nexo-psico.vercel.app/"
+        success: "https://nexo-psico.vercel.app/#/perfil",
+        failure: "https://nexo-psico.vercel.app/#/",
+        pending: "https://nexo-psico.vercel.app/#/"
       },
       auto_return: "approved",
       // 2. EL SECRETO PARA EL WEBHOOK: La información invisible de la factura

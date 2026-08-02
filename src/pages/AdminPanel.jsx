@@ -19,7 +19,7 @@ export const AdminPanel = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [cargandoGuardar, setCargandoGuardar] = useState(false);
   const [productoAEditar, setProductoAEditar] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', price: '' });
+  const [form, setForm] = useState({ title: '', description: '', price: '', tipo: 'cuadernillo', link_drive: '' });
   const [archivoPdf, setArchivoPdf] = useState(null);
   const [archivoImagen, setArchivoImagen] = useState(null);
 
@@ -46,14 +46,27 @@ export const AdminPanel = () => {
     const { data } = await supabase
       .from('compras')
       .select(`
-        id, 
-        created_at, 
+        id,
+        created_at,
         estado_pago,
         cliente_id,
-        productos ( title, price )
+        email_comprador,
+        acceso_entregado,
+        productos ( title, price, tipo )
       `)
       .order('created_at', { ascending: false });
     if (data) setVentas(data);
+  };
+
+  const marcarAccesoEntregado = async (ventaId) => {
+    try {
+      const { error } = await supabase.from('compras').update({ acceso_entregado: true }).eq('id', ventaId);
+      if (error) throw error;
+      await fetchVentas();
+      mostrarFeedback('exito', 'Marcado como entregado.');
+    } catch (error) {
+      mostrarFeedback('error', 'Error al marcar como entregado: ' + error.message);
+    }
   };
 
 /*   const fetchUsuarios = async () => {
@@ -96,15 +109,21 @@ export const AdminPanel = () => {
   // ----------------------------------------------------------------
   const abrirModalEdicion = (producto) => {
     setProductoAEditar(producto);
-    setForm({ title: producto.title || '', description: producto.description || '', price: producto.price || '' });
-    setArchivoPdf(null); 
+    setForm({
+      title: producto.title || '',
+      description: producto.description || '',
+      price: producto.price || '',
+      tipo: producto.tipo || 'cuadernillo',
+      link_drive: producto.link_drive || ''
+    });
+    setArchivoPdf(null);
     setArchivoImagen(null);
     setModalVisible(true);
   };
 
   const abrirModalCreacion = () => {
     setProductoAEditar(null);
-    setForm({ title: '', description: '', price: '' });
+    setForm({ title: '', description: '', price: '', tipo: 'cuadernillo', link_drive: '' });
     setArchivoPdf(null);
     setArchivoImagen(null);
     setModalVisible(true);
@@ -139,26 +158,28 @@ export const AdminPanel = () => {
         finalImageUrl = publicImgUrl.publicUrl;
       }
 
+      const linkDriveFinal = form.tipo === 'curso' ? (form.link_drive || null) : null;
+
       if (productoAEditar) {
         const { error: updateError } = await supabase.from('productos')
-          .update({ title: form.title, description: form.description, price: Number(form.price), pdf_url: finalPdfUrl, image_url: finalImageUrl })
+          .update({ title: form.title, description: form.description, price: Number(form.price), pdf_url: finalPdfUrl, image_url: finalImageUrl, tipo: form.tipo, link_drive: linkDriveFinal })
           .eq('id', productoAEditar.id);
         if (updateError) throw updateError;
         mostrarFeedback('exito', '¡Los cambios se guardaron correctamente!');
       } else {
         const { error: insertError } = await supabase.from('productos').insert([{
-          title: form.title, description: form.description, price: Number(form.price), pdf_url: finalPdfUrl, image_url: finalImageUrl, activo: true 
+          title: form.title, description: form.description, price: Number(form.price), pdf_url: finalPdfUrl, image_url: finalImageUrl, tipo: form.tipo, link_drive: linkDriveFinal, activo: true
         }]);
         if (insertError) throw insertError;
-        mostrarFeedback('exito', '¡El cuadernillo se creó con éxito!');
+        mostrarFeedback('exito', '¡El producto se creó con éxito!');
       }
 
       setModalVisible(false);
       setProductoAEditar(null);
-      setForm({ title: '', description: '', price: '' });
+      setForm({ title: '', description: '', price: '', tipo: 'cuadernillo', link_drive: '' });
       setArchivoPdf(null);
       setArchivoImagen(null);
-      await fetchProductos(); 
+      await fetchProductos();
 
     } catch (error) {
       mostrarFeedback('error', 'Hubo un error al guardar: ' + error.message);
@@ -179,7 +200,7 @@ export const AdminPanel = () => {
       const { error } = await supabase.from('productos').update({ activo: !esActivo }).eq('id', id);
       if (error) throw error;
       await fetchProductos(); 
-      mostrarFeedback('exito', `El cuadernillo se ${esActivo ? 'pausó' : 'activó'} correctamente.`);
+      mostrarFeedback('exito', `El producto se ${esActivo ? 'pausó' : 'activó'} correctamente.`);
     } catch (error) {
       mostrarFeedback('error', "Error al cambiar el estado: " + error.message);
     } finally {
@@ -213,7 +234,7 @@ export const AdminPanel = () => {
             {pestañaActiva === 'cuadernillos' && (
               <button onClick={abrirModalCreacion} className="bg-nexo-dark text-white px-5 py-2.5 rounded-xl hover:bg-nexo-blue transition-colors shadow-sm font-semibold flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                Nuevo Cuadernillo
+                Nuevo Producto
               </button>
             )}
           </div>
@@ -225,7 +246,7 @@ export const AdminPanel = () => {
               className={`pb-3 text-sm md:text-base font-bold whitespace-nowrap transition-colors border-b-2 px-1
                 ${pestañaActiva === 'cuadernillos' ? 'text-nexo-blue border-nexo-blue' : 'text-nexo-dark/50 border-transparent hover:text-nexo-dark/80'}`}
             >
-              📚 Catálogo de Cuadernillos
+              📚 Catálogo de Cursos y Cuadernillos
             </button>
             <button 
               onClick={() => setPestañaActiva('ventas')} 
@@ -255,6 +276,7 @@ export const AdminPanel = () => {
                 <thead>
                   <tr className="bg-nexo-sand/20 border-b border-nexo-sand/30">
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Título</th>
+                    <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Tipo</th>
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Estado</th>
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Precio</th>
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider text-right">Acciones</th>
@@ -274,6 +296,11 @@ export const AdminPanel = () => {
                             )}
                             <span>{producto.title}</span>
                           </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 bg-nexo-sand/20 text-nexo-dark px-3 py-1 rounded-full text-xs font-bold border border-nexo-sand/40">
+                            {producto.tipo === 'curso' ? '🎥 Curso' : '📄 Cuadernillo'}
+                          </span>
                         </td>
                         <td className="p-4">
                           {esActivo ? (
@@ -297,7 +324,7 @@ export const AdminPanel = () => {
                     );
                   })}
                   {productos.length === 0 && (
-                    <tr><td colSpan="4" className="p-12 text-center text-nexo-dark/50">No hay cuadernillos cargados todavía.</td></tr>
+                    <tr><td colSpan="5" className="p-12 text-center text-nexo-dark/50">No hay productos cargados todavía.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -316,30 +343,47 @@ export const AdminPanel = () => {
                   <tr className="bg-nexo-sand/20 border-b border-nexo-sand/30">
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Fecha</th>
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Producto Vendido</th>
+                    <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Compradora</th>
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Ingreso</th>
                     <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Estado de Pago</th>
+                    <th className="p-4 font-semibold text-nexo-dark text-sm uppercase tracking-wider">Acceso al Curso</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {ventas.map(venta => (
-                    <tr key={venta.id} className="border-b border-nexo-sand/10 hover:bg-nexo-sand/5 transition-colors">
-                      <td className="p-4 font-medium text-nexo-dark/70 text-sm">
-                        {new Date(venta.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="p-4 font-bold text-nexo-dark">{venta.productos?.title || 'Producto Eliminado'}</td>
-                      <td className="p-4 font-bold text-green-700">
-                        ${venta.productos?.price ? Number(venta.productos.price).toLocaleString('es-AR') : '---'}
-                      </td>
-                      <td className="p-4">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border 
-                          ${venta.estado_pago === 'completado' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
-                          {venta.estado_pago === 'completado' ? 'Aprobado' : 'Pendiente'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {ventas.map(venta => {
+                    const esCurso = venta.productos?.tipo === 'curso';
+                    return (
+                      <tr key={venta.id} className="border-b border-nexo-sand/10 hover:bg-nexo-sand/5 transition-colors">
+                        <td className="p-4 font-medium text-nexo-dark/70 text-sm">
+                          {new Date(venta.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="p-4 font-bold text-nexo-dark">{venta.productos?.title || 'Producto Eliminado'}</td>
+                        <td className="p-4 text-nexo-dark/80 text-sm">{venta.email_comprador || '---'}</td>
+                        <td className="p-4 font-bold text-green-700">
+                          ${venta.productos?.price ? Number(venta.productos.price).toLocaleString('es-AR') : '---'}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border
+                            ${venta.estado_pago === 'completado' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                            {venta.estado_pago === 'completado' ? 'Aprobado' : 'Pendiente'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {!esCurso ? (
+                            <span className="text-xs text-nexo-dark/40">No aplica</span>
+                          ) : venta.acceso_entregado ? (
+                            <span className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">✅ Entregado</span>
+                          ) : (
+                            <button onClick={() => marcarAccesoEntregado(venta.id)} className="text-xs font-semibold text-white bg-nexo-dark hover:bg-nexo-blue px-3 py-1.5 rounded-lg transition-colors">
+                              Marcar como entregado
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {ventas.length === 0 && (
-                    <tr><td colSpan="4" className="p-12 text-center text-nexo-dark/50">Aún no hay registros de ventas. ¡Pronto llegará la primera! 🚀</td></tr>
+                    <tr><td colSpan="6" className="p-12 text-center text-nexo-dark/50">Aún no hay registros de ventas. ¡Pronto llegará la primera! 🚀</td></tr>
                   )}
                 </tbody>
               </table>
@@ -359,9 +403,9 @@ export const AdminPanel = () => {
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               )}
             </div>
-            <h3 className="text-xl font-bold text-nexo-dark mb-2">{modalConfirmacion.estadoActual !== false ? '¿Pausar cuadernillo?' : '¿Activar cuadernillo?'}</h3>
+            <h3 className="text-xl font-bold text-nexo-dark mb-2">{modalConfirmacion.estadoActual !== false ? '¿Pausar producto?' : '¿Activar producto?'}</h3>
             <p className="text-sm text-nexo-dark/70 mb-6">
-              Estás a punto de {modalConfirmacion.estadoActual !== false ? 'pausar' : 'activar'} <strong>"{modalConfirmacion.titulo}"</strong>. 
+              Estás a punto de {modalConfirmacion.estadoActual !== false ? 'pausar' : 'activar'} <strong>"{modalConfirmacion.titulo}"</strong>.
               {modalConfirmacion.estadoActual !== false ? ' Dejará de verse en la tienda pública.' : ' Volverá a estar disponible para la venta.'}
             </p>
             <div className="flex gap-3 justify-center">
@@ -383,9 +427,20 @@ export const AdminPanel = () => {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            <h2 className="text-2xl font-bold text-nexo-dark mb-6">{productoAEditar ? 'Editar Cuadernillo' : 'Agregar Cuadernillo'}</h2>
-            
+            <h2 className="text-2xl font-bold text-nexo-dark mb-6">{productoAEditar ? 'Editar Producto' : 'Agregar Producto'}</h2>
+
             <form onSubmit={handleGuardar} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-nexo-dark mb-1">Tipo*</label>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setForm({...form, tipo: 'cuadernillo'})} className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${form.tipo === 'cuadernillo' ? 'bg-nexo-dark text-white border-nexo-dark' : 'bg-white text-nexo-dark border-nexo-sand/50 hover:bg-nexo-sand/10'}`}>
+                    📄 Cuadernillo
+                  </button>
+                  <button type="button" onClick={() => setForm({...form, tipo: 'curso'})} className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${form.tipo === 'curso' ? 'bg-nexo-dark text-white border-nexo-dark' : 'bg-white text-nexo-dark border-nexo-sand/50 hover:bg-nexo-sand/10'}`}>
+                    🎥 Curso (PDF + Video)
+                  </button>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-nexo-dark mb-1">Título*</label>
                 <input type="text" value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} className="w-full rounded-xl border border-nexo-sand/50 px-4 py-2.5 focus:ring-2 focus:ring-nexo-blue outline-none transition-all text-sm"/>
@@ -398,6 +453,13 @@ export const AdminPanel = () => {
                 <label className="block text-sm font-medium text-nexo-dark mb-1">Precio (en pesos ARS)</label>
                 <input type="number" value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} className="w-full rounded-xl border border-nexo-sand/50 px-4 py-2.5 focus:ring-2 focus:ring-nexo-blue outline-none transition-all text-sm"/>
               </div>
+              {form.tipo === 'curso' && (
+                <div>
+                  <label className="block text-sm font-medium text-nexo-dark mb-1">Link de Drive del video (referencia interna)</label>
+                  <input type="text" value={form.link_drive} onChange={(e) => setForm({...form, link_drive: e.target.value})} placeholder="https://drive.google.com/..." className="w-full rounded-xl border border-nexo-sand/50 px-4 py-2.5 focus:ring-2 focus:ring-nexo-blue outline-none transition-all text-sm"/>
+                  <p className="text-xs text-nexo-dark/50 mt-1">Solo lo ves vos acá, para tenerlo a mano cuando compartas el acceso manualmente.</p>
+                </div>
+              )}
 
               <div className="bg-nexo-sand/10 p-4 rounded-xl border border-nexo-sand/30 space-y-4">
                 {productoAEditar && (
@@ -430,7 +492,7 @@ export const AdminPanel = () => {
                   {cargandoGuardar ? (
                     <><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>{productoAEditar ? 'Guardando cambios...' : 'Guardando y subiendo...'}</>
                   ) : (
-                    productoAEditar ? 'Guardar Cambios' : 'Guardar Cuadernillo'
+                    productoAEditar ? 'Guardar Cambios' : 'Guardar Producto'
                   )}
                 </button>
               </div>

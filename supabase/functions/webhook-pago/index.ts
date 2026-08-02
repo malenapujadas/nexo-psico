@@ -32,15 +32,20 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       const supabase = createClient(supabaseUrl, supabaseKey)
 
+      // Buscamos el email de la compradora para poder avisarle por afuera (ej. entrega manual de cursos)
+      const { data: usuarioData } = await supabase.auth.admin.getUserById(usuario_id)
+      const email_comprador = usuarioData?.user?.email ?? null
+
       // 5. ¡Anotamos la compra con LOS NOMBRES EXACTOS DE TUS COLUMNAS!
       const { error } = await supabase
-        .from('compras') 
+        .from('compras')
         .insert([
-          { 
+          {
             cliente_id: usuario_id,           // Actualizado
             producto_id: producto_id,         // Se mantiene igual
             mercadopago_id: id_pago.toString(), // Actualizado
-            estado_pago: 'completado'         // Actualizado
+            estado_pago: 'completado',        // Actualizado
+            email_comprador: email_comprador
           }
         ])
 

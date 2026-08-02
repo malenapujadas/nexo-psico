@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 
-export const Cuadernillos = () => {
+export const Cursos = () => {
   const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -96,13 +96,13 @@ export const Cuadernillos = () => {
         
         <div className="max-w-3xl mb-16 md:mb-24 animate-fade-in-up">
           <h2 className="text-sm font-bold text-nexo-green uppercase tracking-widest mb-4">
-            Nuestros Materiales
+            Formación y Recursos
           </h2>
           <h1 className="text-3xl md:text-5xl font-semibold text-nexo-dark mb-6">
-            Materiales Descargables
+            Cursos y Cuadernillos
           </h1>
           <p className="text-lg text-nexo-dark/80 leading-relaxed">
-            Herramientas prácticas diseñadas por nuestro equipo para acompañarte en tu desarrollo personal y profesional, estés donde estés.
+            Cursos y herramientas prácticas diseñadas por nuestro equipo para acompañarte en tu desarrollo personal y profesional, estés donde estés.
           </p>
         </div>
 
@@ -110,6 +110,7 @@ export const Cuadernillos = () => {
           {productos.map((producto) => {
             // chequeo si el id esta en el listado de compras
             const yaComprado = cuadernillosComprados.includes(producto.id);
+            const esCurso = producto.tipo === 'curso';
 
             return (
               <div 
@@ -127,7 +128,7 @@ export const Cuadernillos = () => {
                     <span className="text-nexo-dark/40 italic text-sm">Espacio para imagen</span>
                   )}
                   <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-nexo-blue tracking-wide uppercase shadow-sm">
-                    {producto.tipo || 'PDF'}
+                    {esCurso ? 'Curso' : 'Cuadernillo'}
                   </div>
                 </div>
 
@@ -144,7 +145,7 @@ export const Cuadernillos = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-nexo-dark/60 uppercase tracking-wide flex items-center gap-2">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        Archivo PDF
+                        {esCurso ? 'PDF + Video' : 'Archivo PDF'}
                       </span>
                       <span className="text-3xl font-bold text-nexo-dark">
                         ${Number(producto.price).toLocaleString('es-AR')}
@@ -176,7 +177,7 @@ export const Cuadernillos = () => {
                       ) : (
                         <>
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                          Adquirir cuadernillo
+                          {esCurso ? 'Adquirir curso' : 'Adquirir cuadernillo'}
                         </>
                       )}
                     </button>

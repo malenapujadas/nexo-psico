@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { DynamicTitle } from './components/DynamicTitle';
 import { Navbar } from './components/Navbar';
@@ -11,7 +11,7 @@ import { Orientacion } from './pages/Orientacion';
 import { Supervisiones } from './pages/Supervisiones';
 import { Trabajemos } from './pages/Trabajemos';
 import { Programa } from './pages/Programa';
-import { Cuadernillos } from './pages/Cuadernillos';
+import { Cursos } from './pages/Cursos';
 import { Contacto } from './pages/Contacto';
 import { Servicios } from './pages/Servicios';
 import { Auth } from './pages/Auth';
@@ -41,7 +41,8 @@ function App() {
               <Route path="/orientacion-vocacional" element={<Orientacion />} />
               <Route path="/supervisiones" element={<Supervisiones />} />
               <Route path="/trabajemos" element={<Trabajemos />} />
-              <Route path="/cuadernillos" element={<Cuadernillos />} />
+              <Route path="/cursos" element={<Cursos />} />
+              <Route path="/cuadernillos" element={<Navigate to="/cursos" replace />} />
               <Route path="/programa" element={<Programa />} />
               <Route path="/iniciar-sesion" element={<Auth />} />
               <Route path="/perfil" element={<Perfil />} />

@@ -24,7 +24,7 @@ export const Navbar = () => {
     },
     { name: 'Trabajemos', href: '/trabajemos' },
     { name: 'Programa Bienestar', href: '/programa' },
-    { name: 'Cuadernillos', href: '/cuadernillos' },  
+    { name: 'Cursos', href: '/cursos' },  
     { name: 'Contacto', href: '/contacto' },
   ];
 

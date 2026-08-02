@@ -38,9 +38,11 @@ export const Perfil = () => {
             id,
             created_at,
             producto_id,
+            acceso_entregado,
             productos (
               title,
-              pdf_url
+              pdf_url,
+              tipo
             )
           `)
           .eq('cliente_id', usuario.id)
@@ -54,7 +56,9 @@ export const Perfil = () => {
           // OJO: Chequeá que 'title' y 'pdf_url' coincidan con los nombres de tus columnas en Supabase
           titulo: compra.productos?.title || 'Material Descargable',
           fechaCompra: new Date(compra.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
-          urlDescarga: compra.productos?.pdf_url || '#' 
+          urlDescarga: compra.productos?.pdf_url || '#',
+          esCurso: compra.productos?.tipo === 'curso',
+          accesoEntregado: compra.acceso_entregado
         }));
 
         setMisCuadernillos(comprasFormateadas);
@@ -193,7 +197,7 @@ export const Perfil = () => {
         <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-nexo-sand/30 animate-fade-in-up delay-100">
           <h2 className="text-xl font-bold text-nexo-dark mb-6 flex items-center gap-4">
             <svg className="w-5 h-5 text-nexo-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            Mis Cuadernillos Descargables
+            Mis Cursos y Cuadernillos
           </h2>
 
           {cargandoCompras ? (
@@ -204,32 +208,45 @@ export const Perfil = () => {
             <div className="text-center py-12 border-2 border-dashed border-nexo-sand/40 rounded-2xl">
               <svg className="w-12 h-12 text-nexo-dark/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
               <p className="text-nexo-dark/60 font-medium mb-2">Todavía no adquiriste ningún material</p>
-              <p className="text-xs text-nexo-dark/40 max-w-sm mx-auto">Cuando compres un cuadernillo en nuestro catálogo, vas a poder descargarlo en formato PDF directamente desde acá las veces que quieras.</p>
+              <p className="text-xs text-nexo-dark/40 max-w-sm mx-auto">Cuando compres un curso o cuadernillo en nuestro catálogo, vas a poder descargar el PDF directamente desde acá las veces que quieras.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {misCuadernillos.map((item) => (
-                <div key={item.id} className="flex flex-col md:flex-row items-center justify-between p-5 bg-nexo-bg/40 rounded-2xl border border-nexo-sand/30 hover:border-nexo-sand/60 transition-colors gap-4 group">
-                  
-                  <div className="flex items-center gap-4 w-full md:w-auto text-left">
-                    <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center flex-shrink-0 text-nexo-blue border border-nexo-sand/20 group-hover:scale-105 transition-transform">
-                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <div key={item.id} className="flex flex-col p-5 bg-nexo-bg/40 rounded-2xl border border-nexo-sand/30 hover:border-nexo-sand/60 transition-colors gap-4 group">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 w-full md:w-auto text-left">
+                      <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center flex-shrink-0 text-nexo-blue border border-nexo-sand/20 group-hover:scale-105 transition-transform">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-nexo-dark">{item.titulo}</h3>
+                        <p className="text-xs font-medium text-nexo-dark/50 mt-0.5">Adquirido el {item.fechaCompra}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-base font-bold text-nexo-dark">{item.titulo}</h3>
-                      <p className="text-xs font-medium text-nexo-dark/50 mt-0.5">Adquirido el {item.fechaCompra}</p>
-                    </div>
+
+                    <a
+                      href={item.urlDescarga}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full md:w-auto px-5 py-2.5 bg-nexo-dark text-white text-sm font-semibold rounded-xl hover:bg-nexo-blue transition-all flex items-center justify-center gap-2 shadow-sm hover:-translate-y-0.5"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      Descargar PDF
+                    </a>
                   </div>
 
-                  <a 
-                    href={item.urlDescarga} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full md:w-auto px-5 py-2.5 bg-nexo-dark text-white text-sm font-semibold rounded-xl hover:bg-nexo-blue transition-all flex items-center justify-center gap-2 shadow-sm hover:-translate-y-0.5"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    Descargar PDF
-                  </a>
+                  {item.esCurso && (
+                    item.accesoEntregado ? (
+                      <div className="flex items-center gap-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                        ✅ Ya tenés acceso a tu curso — revisá tu correo electrónico.
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm font-medium text-nexo-blue bg-nexo-blue/10 border border-nexo-blue/20 rounded-xl px-4 py-3">
+                        🎥 Muy pronto vas a recibir por email el acceso a tu curso.
+                      </div>
+                    )
+                  )}
                 </div>
               ))}
             </div>

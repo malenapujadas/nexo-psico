@@ -115,7 +115,7 @@ export const Auth = () => {
         <p className="mt-2 text-center text-sm text-nexo-dark/70">
           {vista === 'recuperar' 
             ? 'Ingresá tu correo y te enviaremos las instrucciones'
-            : 'Para acceder a tus cuadernillos descargables'}
+            : 'Para acceder a tus cursos y cuadernillos'}
         </p>
       </div>
 
