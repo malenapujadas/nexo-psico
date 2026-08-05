@@ -50,6 +50,39 @@ serve(async (req) => {
         ])
 
       if (error) throw error
+
+      // Aviso interno de nueva venta (no debe frenar el webhook si falla)
+      try {
+        const { data: producto } = await supabase
+          .from('productos')
+          .select('title, price, tipo')
+          .eq('id', producto_id)
+          .single()
+
+        const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'NexoPsico <onboarding@resend.dev>',
+            to: 'nexopsicored@gmail.com',
+            subject: `Nueva venta: ${producto?.title ?? 'Producto'}`,
+            html: `
+              <h2>¡Nueva venta confirmada!</h2>
+              <p><strong>Producto:</strong> ${producto?.title ?? '—'}</p>
+              <p><strong>Tipo:</strong> ${producto?.tipo === 'curso' ? 'Curso' : 'Cuadernillo'}</p>
+              <p><strong>Compradora:</strong> ${email_comprador ?? '—'}</p>
+              <p><strong>Monto:</strong> $${producto?.price ? Number(producto.price).toLocaleString('es-AR') : '—'}</p>
+              <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-AR')}</p>
+            `,
+          }),
+        })
+      } catch (emailError) {
+        console.error('Error al enviar el aviso de venta por email:', emailError.message)
+      }
     }
 
     return new Response('OK', { status: 200 })
