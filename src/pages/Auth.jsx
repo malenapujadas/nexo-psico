@@ -145,7 +145,7 @@ export const Auth = () => {
                     ${errorEmail 
                       ? 'ring-red-500 focus:ring-red-500 text-red-900 bg-red-50/30' 
                       : 'text-nexo-dark ring-nexo-sand/50 focus:ring-nexo-blue'}`}
-                  placeholder="hola@ejemplo.com"
+                  placeholder="ejemplo@gmail.com"
                 />
               </div>
               {errorEmail && (
