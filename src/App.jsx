@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { DynamicTitle } from './components/DynamicTitle';
+import { PasswordRecoveryListener } from './components/PasswordRecoveryListener';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -26,6 +27,7 @@ function App() {
       <HashRouter>
         <ScrollToTop />
         <DynamicTitle />
+        <PasswordRecoveryListener />
         <div className="min-h-screen flex flex-col">
           {/* El Navbar queda fijo arriba */}
           <Navbar />
