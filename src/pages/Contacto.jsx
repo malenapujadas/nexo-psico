@@ -9,10 +9,11 @@ export const Contacto = () => {
   });
 
   const [errors, setErrors] = useState({});
-  
+
   // NUEVOS ESTADOS PARA EL ENVÍO
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [nombreEnviado, setNombreEnviado] = useState('');
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -85,6 +86,7 @@ export const Contacto = () => {
         });
 
         if (response.ok) {
+          setNombreEnviado(formData.nombre.trim());
           setIsSuccess(true); // Mostramos el mensaje de éxito
           setFormData({ nombre: '', email: '', motivo: '', mensaje: '' }); // Limpiamos
         } else {
@@ -129,7 +131,7 @@ export const Contacto = () => {
               </div>
               <h3 className="text-2xl font-bold text-nexo-dark mb-2">¡Mensaje enviado!</h3>
               <p className="text-nexo-dark/80">
-                Gracias por escribirnos, {formData.nombre}. Recibimos tu consulta y te vamos a estar respondiendo muy pronto.
+                Gracias por escribirnos, {nombreEnviado}. Recibimos tu consulta y te vamos a estar respondiendo muy pronto.
               </p>
               <button 
                 onClick={() => setIsSuccess(false)}

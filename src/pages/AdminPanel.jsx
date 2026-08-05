@@ -132,10 +132,32 @@ export const AdminPanel = () => {
 
   const handleGuardar = async (e) => {
     e.preventDefault();
-    if (!form.title || !form.price || (!productoAEditar && !archivoPdf)) {
-      mostrarFeedback('error', 'Por favor completá los datos requeridos.');
+
+    const tituloLimpio = form.title.trim();
+    const descripcionLimpia = form.description.trim();
+    const precioNumero = Number(form.price);
+
+    if (!tituloLimpio) {
+      mostrarFeedback('error', 'El título no puede estar vacío.');
       return;
     }
+    if (!descripcionLimpia) {
+      mostrarFeedback('error', 'La descripción no puede estar vacía.');
+      return;
+    }
+    if (!form.price || isNaN(precioNumero) || precioNumero <= 0) {
+      mostrarFeedback('error', 'El precio tiene que ser un número mayor a cero.');
+      return;
+    }
+    if (!productoAEditar && !archivoPdf) {
+      mostrarFeedback('error', 'Tenés que seleccionar un archivo PDF.');
+      return;
+    }
+    if (form.tipo === 'curso' && form.link_drive && !/^https?:\/\//.test(form.link_drive.trim())) {
+      mostrarFeedback('error', 'El link de Drive tiene que empezar con http:// o https://');
+      return;
+    }
+
     setCargandoGuardar(true);
     try {
       let finalPdfUrl = productoAEditar ? productoAEditar.pdf_url : null;
@@ -159,17 +181,17 @@ export const AdminPanel = () => {
         finalImageUrl = publicImgUrl.publicUrl;
       }
 
-      const linkDriveFinal = form.tipo === 'curso' ? (form.link_drive || null) : null;
+      const linkDriveFinal = form.tipo === 'curso' ? (form.link_drive.trim() || null) : null;
 
       if (productoAEditar) {
         const { error: updateError } = await supabase.from('productos')
-          .update({ title: form.title, description: form.description, price: Number(form.price), pdf_url: finalPdfUrl, image_url: finalImageUrl, tipo: form.tipo, link_drive: linkDriveFinal })
+          .update({ title: tituloLimpio, description: descripcionLimpia, price: precioNumero, pdf_url: finalPdfUrl, image_url: finalImageUrl, tipo: form.tipo, link_drive: linkDriveFinal })
           .eq('id', productoAEditar.id);
         if (updateError) throw updateError;
         mostrarFeedback('exito', '¡Los cambios se guardaron correctamente!');
       } else {
         const { error: insertError } = await supabase.from('productos').insert([{
-          title: form.title, description: form.description, price: Number(form.price), pdf_url: finalPdfUrl, image_url: finalImageUrl, tipo: form.tipo, link_drive: linkDriveFinal, activo: true
+          title: tituloLimpio, description: descripcionLimpia, price: precioNumero, pdf_url: finalPdfUrl, image_url: finalImageUrl, tipo: form.tipo, link_drive: linkDriveFinal, activo: true
         }]);
         if (insertError) throw insertError;
         mostrarFeedback('exito', '¡El producto se creó con éxito!');

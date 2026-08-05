@@ -17,6 +17,7 @@ export const Auth = () => {
 
   // Expresión regular actualizada para permitir caracteres especiales
   const passwordSegura = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,8 +35,11 @@ export const Auth = () => {
     if (!emailLimpio) {
       setErrorEmail('Es obligatorio ingresar un correo válido.');
       hayErrores = true;
+    } else if (!emailValido.test(emailLimpio)) {
+      setErrorEmail('Ingresá un formato de correo electrónico válido.');
+      hayErrores = true;
     }
-    
+
     if (vista !== 'recuperar' && !passwordLimpia) {
       setErrorPassword('Es obligatorio ingresar una contraseña.');
       hayErrores = true;
