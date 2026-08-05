@@ -37,7 +37,12 @@ export const AdminPanel = () => {
 
   // FUNCIONES PARA TRAER DATOS
   const fetchProductos = async () => {
-    const { data } = await supabase.from('productos').select('*').order('created_at', { ascending: false });
+    // pdf_url y link_drive no se traen acá (quedan protegidos a nivel de base) — se piden
+    // puntualmente con get_producto_privado() al abrir el modal de edición de cada producto.
+    const { data } = await supabase
+      .from('productos')
+      .select('id, title, description, price, image_url, tipo, slug, activo, created_at')
+      .order('created_at', { ascending: false });
     if (data) setProductos(data);
   };
 
@@ -108,14 +113,20 @@ export const AdminPanel = () => {
   // ----------------------------------------------------------------
   // LÓGICA DE CUADERNILLOS (Guardar, Editar, Pausar)
   // ----------------------------------------------------------------
-  const abrirModalEdicion = (producto) => {
-    setProductoAEditar(producto);
+  const abrirModalEdicion = async (producto) => {
+    // pdf_url y link_drive están protegidos a nivel de base — los pedimos puntualmente acá
+    const { data: privado } = await supabase
+      .rpc('get_producto_privado', { p_producto_id: producto.id })
+      .single();
+
+    const productoCompleto = { ...producto, pdf_url: privado?.pdf_url ?? null, link_drive: privado?.link_drive ?? null };
+    setProductoAEditar(productoCompleto);
     setForm({
-      title: producto.title || '',
-      description: producto.description || '',
-      price: producto.price || '',
-      tipo: producto.tipo || 'cuadernillo',
-      link_drive: producto.link_drive || ''
+      title: productoCompleto.title || '',
+      description: productoCompleto.description || '',
+      price: productoCompleto.price || '',
+      tipo: productoCompleto.tipo || 'cuadernillo',
+      link_drive: productoCompleto.link_drive || ''
     });
     setArchivoPdf(null);
     setArchivoImagen(null);

@@ -32,6 +32,7 @@ export const Perfil = () => {
       if (!usuario) return;
       try {
         // join -- traigo la info de 'compras' y le sumamos la info de 'productos'
+        // (pdf_url queda protegido a nivel de base, se pide aparte con get_mi_pdf)
         const { data, error } = await supabase
           .from('compras')
           .select(`
@@ -41,7 +42,6 @@ export const Perfil = () => {
             acceso_entregado,
             productos (
               title,
-              pdf_url,
               tipo
             )
           `)
@@ -50,15 +50,17 @@ export const Perfil = () => {
 
         if (error) throw error;
 
-        // Formateamos los datos para la interfaz
-        const comprasFormateadas = data.map(compra => ({
-          id: compra.id,
-          // OJO: Chequeá que 'title' y 'pdf_url' coincidan con los nombres de tus columnas en Supabase
-          titulo: compra.productos?.title || 'Material Descargable',
-          fechaCompra: new Date(compra.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
-          urlDescarga: compra.productos?.pdf_url || '#',
-          esCurso: compra.productos?.tipo === 'curso',
-          accesoEntregado: compra.acceso_entregado
+        // Formateamos los datos para la interfaz, pidiendo el link real de descarga por cada compra
+        const comprasFormateadas = await Promise.all(data.map(async (compra) => {
+          const { data: pdfUrl } = await supabase.rpc('get_mi_pdf', { p_producto_id: compra.producto_id });
+          return {
+            id: compra.id,
+            titulo: compra.productos?.title || 'Material Descargable',
+            fechaCompra: new Date(compra.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
+            urlDescarga: pdfUrl || '#',
+            esCurso: compra.productos?.tipo === 'curso',
+            accesoEntregado: compra.acceso_entregado
+          };
         }));
 
         setMisCuadernillos(comprasFormateadas);
