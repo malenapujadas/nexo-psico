@@ -11,6 +11,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Los links de recuperación de contraseña de Supabase llegan con los tokens
+      // en el hash de la URL (ej. #access_token=...&type=recovery). Como el sitio
+      // usa HashRouter, ese hash no matchea ninguna ruta y la app queda en blanco.
+      // Lo reescribimos ACÁ, antes de que se cargue cualquier módulo de React o
+      // del cliente de Supabase, para que la ruta correcta ya esté resuelta desde
+      // el primer render y no dependa de ganarle una carrera a ningún evento
+      // asincrónico interno de la librería de auth.
+      (function () {
+        var rawHash = window.location.hash;
+        if (rawHash.indexOf('type=recovery') !== -1 && rawHash.indexOf('access_token=') !== -1) {
+          window.location.hash = '/actualizar-password?' + rawHash.slice(1);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
