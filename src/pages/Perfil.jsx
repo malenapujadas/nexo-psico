@@ -18,7 +18,7 @@ export const Perfil = () => {
   const [misCuadernillos, setMisCuadernillos] = useState([]);
   const [cargandoCompras, setCargandoCompras] = useState(true);
 
-  const passwordSegura = /^(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+  const passwordSegura = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
   useEffect(() => {
     if (!usuario) {
