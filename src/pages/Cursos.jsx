@@ -15,10 +15,12 @@ export const Cursos = () => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // traigo productos del back
-        const respuesta = await fetch('https://nexo-psico-backend.onrender.com/api/productos');
-        const datos = await respuesta.json();
-        setProductos(datos.filter(producto => producto.activo !== false));
+        // traigo productos directo de Supabase (sin pasar por el backend de Render)
+        const { data: datos, error: errorProductos } = await supabase
+          .from('productos')
+          .select('id, title, description, price, image_url, tipo, activo');
+        if (errorProductos) throw errorProductos;
+        setProductos((datos || []).filter(producto => producto.activo !== false));
 
         // reviso si hay alguien logueado para chequear sus compras
         const { data: { session } } = await supabase.auth.getSession();
@@ -62,9 +64,7 @@ export const Cursos = () => {
       setComprandoId(producto.id);
 
       const { data, error } = await supabase.functions.invoke('crear-pago', {
-        body: { 
-          titulo: producto.title,
-          precio: Number(producto.price),
+        body: {
           usuario_id: session.user.id,
           producto_id: producto.id
         }
