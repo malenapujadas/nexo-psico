@@ -45,17 +45,22 @@ serve(async (req) => {
             producto_id: producto_id,         // Se mantiene igual
             mercadopago_id: id_pago.toString(), // Actualizado
             estado_pago: 'completado',        // Actualizado
-            email_comprador: email_comprador
+            email_comprador: email_comprador,
+            monto: pagoInfo.transaction_amount // El monto real pagado, no el precio actual del producto
           }
         ])
 
+      if (error && error.code === '23505') {
+        // Ya habíamos procesado este pago antes (ej. reintento de notificación de MP) — no hacemos nada más.
+        return new Response('Pago ya procesado', { status: 200 })
+      }
       if (error) throw error
 
       // Aviso interno de nueva venta (no debe frenar el webhook si falla)
       try {
         const { data: producto } = await supabase
           .from('productos')
-          .select('title, price, tipo')
+          .select('title, tipo')
           .eq('id', producto_id)
           .single()
 
@@ -75,7 +80,7 @@ serve(async (req) => {
               <p><strong>Producto:</strong> ${producto?.title ?? '—'}</p>
               <p><strong>Tipo:</strong> ${producto?.tipo === 'curso' ? 'Curso' : 'Cuadernillo'}</p>
               <p><strong>Compradora:</strong> ${email_comprador ?? '—'}</p>
-              <p><strong>Monto:</strong> $${producto?.price ? Number(producto.price).toLocaleString('es-AR') : '—'}</p>
+              <p><strong>Monto pagado:</strong> $${Number(pagoInfo.transaction_amount).toLocaleString('es-AR')}</p>
               <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-AR')}</p>
             `,
           }),

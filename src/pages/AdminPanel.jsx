@@ -52,7 +52,8 @@ export const AdminPanel = () => {
         cliente_id,
         email_comprador,
         acceso_entregado,
-        productos ( title, price, tipo )
+        monto,
+        productos ( title, tipo )
       `)
       .order('created_at', { ascending: false });
     if (data) setVentas(data);
@@ -360,7 +361,7 @@ export const AdminPanel = () => {
                         <td className="p-4 font-bold text-nexo-dark">{venta.productos?.title || 'Producto Eliminado'}</td>
                         <td className="p-4 text-nexo-dark/80 text-sm">{venta.email_comprador || '---'}</td>
                         <td className="p-4 font-bold text-green-700">
-                          ${venta.productos?.price ? Number(venta.productos.price).toLocaleString('es-AR') : '---'}
+                          ${venta.monto != null ? Number(venta.monto).toLocaleString('es-AR') : '---'}
                         </td>
                         <td className="p-4">
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border
