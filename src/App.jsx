@@ -1,7 +1,6 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { DynamicTitle } from './components/DynamicTitle';
-import { PasswordRecoveryListener } from './components/PasswordRecoveryListener';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -24,10 +23,9 @@ import { AdminPanel } from './pages/AdminPanel';
 function App() {
   return (
     <AuthProvider>
-      <HashRouter>
+      <BrowserRouter>
         <ScrollToTop />
         <DynamicTitle />
-        <PasswordRecoveryListener />
         <div className="min-h-screen flex flex-col">
           {/* El Navbar queda fijo arriba */}
           <Navbar />
@@ -57,7 +55,7 @@ function App() {
           {/* El Footer queda fijo abajo */}
           <Footer />
         </div>
-      </HashRouter>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
