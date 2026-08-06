@@ -1,0 +1,24 @@
+name: Supabase Keep-Alive
+
+# Supabase pausa los proyectos free tier tras 7 días sin actividad en la API.
+# Este workflow hace una consulta liviana cada 3 días para que nunca llegue
+# a pausarse. Ver memoria del proyecto para más contexto.
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *' # cada 3 días a las 12:00 UTC
+  workflow_dispatch: {} # permite dispararlo manualmente desde GitHub
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping liviano a la API de Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://wzclvwvhhblzzyahvrvb.supabase.co/rest/v1/productos?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6Y2x2d3ZoaGJsenp5YWh2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzQ1MzksImV4cCI6MjA5ODMxMDUzOX0.7ej7htFeY8sU516oL3VET06mdUu5Y5PGJn0WgCZ_jr8")
+          echo "Respuesta de Supabase: $STATUS"
+          if [ "$STATUS" -ge 400 ]; then
+            echo "::warning::Supabase respondió con código $STATUS"
+          fi
