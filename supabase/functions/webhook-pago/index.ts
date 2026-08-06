@@ -72,7 +72,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'NexoPsico <onboarding@resend.dev>',
+            from: 'NexoPsico <notificaciones@nexopsico.com.ar>',
             to: 'nexopsicored@gmail.com',
             subject: `Nueva venta: ${producto?.title ?? 'Producto'}`,
             html: `
