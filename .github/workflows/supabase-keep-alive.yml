@@ -1,24 +1,29 @@
 name: Supabase Keep-Alive
 
 # Supabase pausa los proyectos free tier tras 7 días sin actividad en la API.
-# Este workflow hace una consulta liviana cada 3 días para que nunca llegue
-# a pausarse. Ver memoria del proyecto para más contexto.
+# Este workflow hace una consulta liviana todos los días para que nunca llegue
+# a pausarse, con reintentos automáticos para que un hipo de red transitorio
+# (ej. una falla puntual de DNS) no haga que se salte una corrida entera.
+# Ver memoria del proyecto para más contexto (se disparó una pausa real el
+# 2026-08-19 por dos fallas de DNS seguidas con el intervalo de 3 días viejo).
 
 on:
   schedule:
-    - cron: '0 12 */3 * *' # cada 3 días a las 12:00 UTC
+    - cron: '0 12 * * *' # todos los días a las 12:00 UTC
   workflow_dispatch: {} # permite dispararlo manualmente desde GitHub
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping liviano a la API de Supabase
+      - name: Ping liviano a la API de Supabase (con reintentos)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            --retry 5 --retry-delay 10 --retry-all-errors --max-time 30 \
             "https://wzclvwvhhblzzyahvrvb.supabase.co/rest/v1/productos?select=id&limit=1" \
-            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6Y2x2d3ZoaGJsenp5YWh2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzQ1MzksImV4cCI6MjA5ODMxMDUzOX0.7ej7htFeY8sU516oL3VET06mdUu5Y5PGJn0WgCZ_jr8")
-          echo "Respuesta de Supabase: $STATUS"
-          if [ "$STATUS" -ge 400 ]; then
-            echo "::warning::Supabase respondió con código $STATUS"
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6Y2x2d3ZoaGJsenp5YWh2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzQ1MzksImV4cCI6MjA5ODMxMDUzOX0.7ej7htFeY8sU516oL3VET06mdUu5Y5PGJn0WgCZ_jr8") || true
+          echo "Respuesta de Supabase: ${HTTP_CODE:-sin respuesta tras reintentos}"
+          if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" -ge 400 ]; then
+            echo "::error::Supabase no respondió correctamente tras varios reintentos (código: ${HTTP_CODE:-ninguno}). Revisar si el proyecto se pausó."
+            exit 1
           fi
