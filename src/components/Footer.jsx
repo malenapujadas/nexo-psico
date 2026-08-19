@@ -109,7 +109,7 @@ export const Footer = () => {
       {/* Barra Inferior de Derechos Autorales */}
       <div className="max-w-7xl mx-auto pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-nexo-bg/40 gap-4">
         <p>© {new Date().getFullYear()} Nexo Psico. Todos los derechos reservados.</p>
-        <p>Diseñado & Desarrollado con ❤️</p>
+        <p>Diseñado & Desarrollado por <a href='https://www.linkedin.com/in/malena-pujadas-135079216/' target="_blank" rel="noopener noreferrer" className="underline hover:text-nexo-sand transition-colors duration-300">Malena Pujadas</a></p>
       </div>
     </footer>
   );
